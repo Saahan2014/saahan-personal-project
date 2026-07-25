@@ -225,7 +225,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Se
 
 
 
-
 #key-box 
 
 #key-input:focus{border-color:rgba(255,215,0,.5);}
@@ -233,7 +232,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Se
 
 
 #key-box 
-
 
 
 
@@ -255,6 +253,24 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Se
 .deck-meta{padding:0 12px 12px;font-size:12px;color:rgba(255,255,255,.4);}
 .deck-del{position:absolute;top:8px;right:8px;background:rgba(239,68,68,.85);border:none;border-radius:6px;color:#fff;font-size:11px;padding:3px 9px;cursor:pointer;display:none;z-index:2;}
 .deck-card:hover .deck-del{display:block;}
+
+/* ── ABOUT ME QUICK-FILL FORM ── */
+#aboutme-overlay{position:fixed;inset:0;z-index:530;background:rgba(8,8,18,.97);display:none;align-items:center;justify-content:center;padding:24px;}
+#aboutme-overlay.open{display:flex;}
+.am-box{width:100%;max-width:640px;max-height:90vh;overflow-y:auto;background:rgba(255,255,255,.04);border:1px solid rgba(255,215,0,.25);border-radius:16px;padding:26px 28px;}
+.am-box h2{font-size:22px;font-weight:900;color:#FFD700;margin-bottom:4px;}
+.am-box .am-sub{font-size:13px;color:rgba(255,255,255,.5);margin-bottom:18px;}
+.am-group{margin-bottom:16px;}
+.am-group h4{font-size:13px;font-weight:800;color:#EC4899;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;}
+.am-field{margin-bottom:8px;}
+.am-field label{display:block;font-size:13px;color:rgba(255,255,255,.75);margin-bottom:4px;}
+.am-field input{width:100%;box-sizing:border-box;padding:9px 11px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:#fff;font-size:14px;}
+.am-field input:focus{outline:none;border-color:rgba(255,215,0,.5);}
+.am-actions{display:flex;gap:10px;margin-top:20px;}
+.am-actions button{flex:1;padding:12px;border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;border:none;}
+.am-create{background:#FFD700;color:#111;}
+.am-create:hover{background:#ffe033;}
+.am-cancel{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2)!important;color:#fff;}
 
 </style>
 </head>
@@ -1783,20 +1799,40 @@ function newDeck(){
 }
 
 
-// ── ABOUT ME TEMPLATE (fill-in-the-blanks) ───────────────────────
-function loadAboutMeTemplate(){
+// ── ABOUT ME QUICK-FILL FORM ──────────────────────────────────────
+function openAboutMeForm(){
+  document.getElementById('aboutme-overlay').classList.add('open');
+}
+function closeAboutMeForm(){
+  document.getElementById('aboutme-overlay').classList.remove('open');
+}
+function submitAboutMeForm(){
+  const v = id => (document.getElementById(id).value || '').trim();
+  loadAboutMeTemplate({
+    name: v('am-name'), age: v('am-age'), oneline: v('am-oneline'),
+    love: v('am-love'), favproject: v('am-favproject'), skill: v('am-skill'),
+    goal1: v('am-goal1'), problem: v('am-problem'), goal5yr: v('am-goal5yr'),
+    hobby: v('am-hobby'), secret: v('am-secret'), favthing: v('am-favthing')
+  });
+  closeAboutMeForm();
+}
+
+// Build the About Me slides from the form answers (blank answers fall back to "____")
+function loadAboutMeTemplate(a){
+  a = a || {};
+  const g = k => a[k] && a[k].length ? a[k] : '____';
   currentDeckId = null;
   stSlides = [];
 
-  // Helper to build a slide with a heading + a list of prompt text boxes
-  function slide(bg, headingText, headingColor, prompts){
+  // Helper to build a slide with a heading + a list of "label — answer" lines
+  function slide(bg, headingText, headingColor, lines){
     const sl = stNewSlide(bg);
     const h = stNewEl('heading', 8, 8);
     h.text = headingText; h.fontSize = 40; h.color = headingColor; h.bold = true;
     h.w = 84; h.h = 16;
     sl.elements.push(h);
     let y = 30;
-    prompts.forEach(p=>{
+    lines.forEach(p=>{
       const t = stNewEl('text', 8, y);
       t.text = p; t.fontSize = 22; t.color = '#ffffff';
       t.w = 84; t.h = 12;
@@ -1808,37 +1844,36 @@ function loadAboutMeTemplate(){
 
   // Slide 1 — Who am I
   stSlides.push(slide('#1a0a2e', 'About Me', '#FFD700', [
-    'My name is ____________',
-    'I am ____ years old',
-    'In one sentence, I am someone who ____________'
+    'Name: ' + g('name'),
+    'Age: ' + g('age'),
+    'In a few words: ' + g('oneline')
   ]));
 
   // Slide 2 — What I do / love
   stSlides.push(slide('#0a1a2e', 'What I Do', '#EC4899', [
-    'I love building ____________',
-    'My favorite project is ____________ because ____________',
-    'A skill I am proud of is ____________'
+    'I love: ' + g('love'),
+    'Favorite project: ' + g('favproject'),
+    'A skill I am proud of: ' + g('skill')
   ]));
 
   // Slide 3 — Goals
   stSlides.push(slide('#0a2e1a', 'My Goals', '#22C55E', [
-    'One day I want to ____________',
-    'A problem I want to solve is ____________',
-    'In 5 years I hope to ____________'
+    'One day I want to: ' + g('goal1'),
+    'A problem I want to solve: ' + g('problem'),
+    'In 5 years, I hope to: ' + g('goal5yr')
   ]));
 
   // Slide 4 — Fun facts
   stSlides.push(slide('#2e1a0a', 'Fun Facts', '#F59E0B', [
-    'When I am not building, I like to ____________',
-    'Something most people do not know about me is ____________',
-    'My favorite thing about creating is ____________'
+    'For fun, I like to: ' + g('hobby'),
+    'Something most people do not know about me: ' + g('secret'),
+    'My favorite thing about creating: ' + g('favthing')
   ]));
 
-  stElidCounter = stElidCounter; // keep counter
   stCur = 0;
   renderStudio();
   deselect();
-  showStudioToast('About Me template loaded — click each line and fill it in!');
+  showStudioToast('About Me slides created — click any line to tweak it!');
 }
 
 // Open an existing saved deck for editing
@@ -2265,7 +2300,7 @@ document.getElementById('start-screen').addEventListener('click', doStart);
     </div>
     <div class="rb-group">
       <span class="rb-label">Template</span>
-      <button class="rb-btn" onclick="loadAboutMeTemplate()">📝 About Me (fill in)</button>
+      <button class="rb-btn" onclick="openAboutMeForm()">📝 About Me (fill in)</button>
     </div>
     <div class="rb-group">
       <span class="rb-label">AI</span>
@@ -2382,6 +2417,47 @@ document.getElementById('start-screen').addEventListener('click', doStart);
     <button class="dl-close" onclick="closeDeckList()">← Back to editor</button>
   </div>
   <div id="deck-grid"></div>
+</div>
+
+<!-- About Me quick-fill form -->
+<div id="aboutme-overlay">
+  <div class="am-box">
+    <h2>📝 About Me</h2>
+    <div class="am-sub">Answer in a few words each — I'll turn it into slides for you.</div>
+
+    <div class="am-group">
+      <h4>About Me</h4>
+      <div class="am-field"><label>Your name</label><input id="am-name" placeholder="e.g. Saahan"></div>
+      <div class="am-field"><label>Your age</label><input id="am-age" placeholder="e.g. 12"></div>
+      <div class="am-field"><label>Describe yourself in a few words</label><input id="am-oneline" placeholder="e.g. builder who loves games"></div>
+    </div>
+
+    <div class="am-group">
+      <h4>What I Do</h4>
+      <div class="am-field"><label>Something you love building or doing</label><input id="am-love" placeholder="e.g. websites"></div>
+      <div class="am-field"><label>Your favorite project</label><input id="am-favproject" placeholder="e.g. Snake game"></div>
+      <div class="am-field"><label>A skill you're proud of</label><input id="am-skill" placeholder="e.g. JavaScript"></div>
+    </div>
+
+    <div class="am-group">
+      <h4>My Goals</h4>
+      <div class="am-field"><label>Something you want to do one day</label><input id="am-goal1" placeholder="e.g. make an app"></div>
+      <div class="am-field"><label>A problem you'd like to solve</label><input id="am-problem" placeholder="e.g. help people learn to code"></div>
+      <div class="am-field"><label>In 5 years, you hope to...</label><input id="am-goal5yr" placeholder="e.g. run my own company"></div>
+    </div>
+
+    <div class="am-group">
+      <h4>Fun Facts</h4>
+      <div class="am-field"><label>What you like to do for fun</label><input id="am-hobby" placeholder="e.g. gaming"></div>
+      <div class="am-field"><label>Something most people don't know about you</label><input id="am-secret" placeholder="e.g. I taught myself to code"></div>
+      <div class="am-field"><label>Your favorite thing about creating</label><input id="am-favthing" placeholder="e.g. seeing it come alive"></div>
+    </div>
+
+    <div class="am-actions">
+      <button class="am-cancel" onclick="closeAboutMeForm()">Cancel</button>
+      <button class="am-create" onclick="submitAboutMeForm()">Create My Slides</button>
+    </div>
+  </div>
 </div>
 </body>
 </html>
