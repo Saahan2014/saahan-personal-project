@@ -1782,6 +1782,65 @@ function newDeck(){
   deselect();
 }
 
+
+// ── ABOUT ME TEMPLATE (fill-in-the-blanks) ───────────────────────
+function loadAboutMeTemplate(){
+  currentDeckId = null;
+  stSlides = [];
+
+  // Helper to build a slide with a heading + a list of prompt text boxes
+  function slide(bg, headingText, headingColor, prompts){
+    const sl = stNewSlide(bg);
+    const h = stNewEl('heading', 8, 8);
+    h.text = headingText; h.fontSize = 40; h.color = headingColor; h.bold = true;
+    h.w = 84; h.h = 16;
+    sl.elements.push(h);
+    let y = 30;
+    prompts.forEach(p=>{
+      const t = stNewEl('text', 8, y);
+      t.text = p; t.fontSize = 22; t.color = '#ffffff';
+      t.w = 84; t.h = 12;
+      sl.elements.push(t);
+      y += 15;
+    });
+    return sl;
+  }
+
+  // Slide 1 — Who am I
+  stSlides.push(slide('#1a0a2e', 'About Me', '#FFD700', [
+    'My name is ____________',
+    'I am ____ years old',
+    'In one sentence, I am someone who ____________'
+  ]));
+
+  // Slide 2 — What I do / love
+  stSlides.push(slide('#0a1a2e', 'What I Do', '#EC4899', [
+    'I love building ____________',
+    'My favorite project is ____________ because ____________',
+    'A skill I am proud of is ____________'
+  ]));
+
+  // Slide 3 — Goals
+  stSlides.push(slide('#0a2e1a', 'My Goals', '#22C55E', [
+    'One day I want to ____________',
+    'A problem I want to solve is ____________',
+    'In 5 years I hope to ____________'
+  ]));
+
+  // Slide 4 — Fun facts
+  stSlides.push(slide('#2e1a0a', 'Fun Facts', '#F59E0B', [
+    'When I am not building, I like to ____________',
+    'Something most people do not know about me is ____________',
+    'My favorite thing about creating is ____________'
+  ]));
+
+  stElidCounter = stElidCounter; // keep counter
+  stCur = 0;
+  renderStudio();
+  deselect();
+  showStudioToast('About Me template loaded — click each line and fill it in!');
+}
+
 // Open an existing saved deck for editing
 function openDeck(id){
   const deck = savedDecks.find(d=>d.id===id);
@@ -1982,7 +2041,8 @@ Rules:
 - If the presentation only describes one project, make one portal with more detailed slides.
 - Pick a distinct colorHex per portal.
 - Keep body text factual and based only on the presentation content.
-- Aim for 2-5 portals total.`;
+- ALWAYS include one extra portal at the end titled "About Me" (label: "About Me", icon: a person emoji like the waving hand or bust emoji, colorHex "#FFD700"). This portal has 2-3 slides introducing the author: who they are, what they do, what they are proud of, and their goals - based on any name, personal details, or theme found in the presentation. If there are no personal details, write a friendly generic introduction that fits the projects shown.
+- Aim for 3-6 portals total (including the About Me portal).`;
 
   try {
     renderGenSteps(1);
@@ -2202,6 +2262,10 @@ document.getElementById('start-screen').addEventListener('click', doStart);
       <button class="rb-btn" onclick="openDeckList()">📂 My Slideshows</button>
       <button class="rb-btn" onclick="newDeck()">＋ New</button>
       <button class="rb-btn active" onclick="presentSlides()">▶ Present</button>
+    </div>
+    <div class="rb-group">
+      <span class="rb-label">Template</span>
+      <button class="rb-btn" onclick="loadAboutMeTemplate()">📝 About Me (fill in)</button>
     </div>
     <div class="rb-group">
       <span class="rb-label">AI</span>
