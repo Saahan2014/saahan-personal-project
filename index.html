@@ -147,7 +147,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Se
 .st-el .el-handle{position:absolute;bottom:-5px;right:-5px;width:10px;height:10px;background:#FFD700;border-radius:2px;cursor:se-resize;}
 .st-el .el-del{position:absolute;top:-10px;right:-10px;width:18px;height:18px;background:#ef4444;border:none;border-radius:50%;color:#fff;font-size:10px;cursor:pointer;display:none;align-items:center;justify-content:center;}
 .st-el.selected .el-del{display:flex;}
-.st-el-text{outline:none;width:100%;height:100%;display:flex;align-items:center;padding:4px 6px;word-break:break-word;}
+.st-el-text{outline:none;width:100%;height:100%;padding:8px 10px;box-sizing:border-box;line-height:1.3;resize:none;font-family:inherit;overflow:hidden;}
 .st-el-img{width:100%;height:100%;object-fit:cover;border-radius:3px;pointer-events:none;}
 
 /* properties panel */
@@ -183,6 +183,61 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Se
 .pnav-btn:hover{background:rgba(255,255,255,.2);}
 #present-counter{position:fixed;top:14px;right:20px;font-size:13px;color:rgba(255,255,255,.4);z-index:10;}
 
+
+/* ── WORLD SELECT ── */
+#world-select{position:fixed;inset:0;z-index:550;background:linear-gradient(160deg,#0a0a1a,#141033,#1e1145);display:none;flex-direction:column;align-items:center;justify-content:center;padding:30px 20px;overflow-y:auto;}
+#world-select.open{display:flex;}
+#world-select h2{font-size:clamp(26px,4vw,40px);font-weight:900;color:#FFD700;margin-bottom:6px;letter-spacing:1px;}
+#world-select .ws-sub{font-size:14px;color:rgba(255,255,255,.5);margin-bottom:26px;text-align:center;}
+.ws-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;max-width:760px;width:100%;}
+.ws-card{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:22px 18px;cursor:pointer;transition:.15s;text-align:left;position:relative;}
+.ws-card:hover{border-color:rgba(255,215,0,.5);background:rgba(255,255,255,.08);transform:translateY(-3px);}
+.ws-card .ws-icon{font-size:34px;margin-bottom:10px;}
+.ws-card h3{font-size:17px;font-weight:800;color:#fff;margin-bottom:5px;}
+.ws-card p{font-size:12px;color:rgba(255,255,255,.5);line-height:1.5;}
+.ws-card .ws-portals{margin-top:12px;font-size:11px;color:#FFD700;font-weight:700;}
+.ws-card .ws-del{position:absolute;top:12px;right:12px;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:#ef4444;border-radius:6px;font-size:11px;padding:3px 8px;cursor:pointer;display:none;}
+.ws-card:hover .ws-del{display:block;}
+.ws-card.official{border-color:rgba(255,215,0,.3);}
+.ws-card.official::after{content:'★ Featured';position:absolute;top:12px;right:12px;font-size:10px;color:#FFD700;font-weight:700;letter-spacing:1px;}
+.ws-back{margin-top:24px;padding:11px 26px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;}
+.ws-back:hover{background:rgba(255,255,255,.15);}
+
+/* ── GENERATION OVERLAY ── */
+#gen-overlay{position:fixed;inset:0;z-index:700;background:rgba(5,5,15,.96);display:none;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:30px;text-align:center;}
+#gen-overlay.open{display:flex;}
+#gen-overlay .gen-spinner{width:60px;height:60px;border:4px solid rgba(255,215,0,.15);border-top-color:#FFD700;border-radius:50%;animation:genspin 0.9s linear infinite;}
+@keyframes genspin{to{transform:rotate(360deg);}}
+#gen-overlay h2{font-size:24px;font-weight:900;color:#FFD700;}
+#gen-status{font-size:14px;color:rgba(255,255,255,.6);min-height:22px;max-width:440px;line-height:1.5;}
+#gen-overlay .gen-steps{display:flex;flex-direction:column;gap:8px;margin-top:6px;font-size:13px;color:rgba(255,255,255,.4);text-align:left;}
+.gen-step{display:flex;align-items:center;gap:8px;}
+.gen-step.done{color:#4ade80;}
+.gen-step.active{color:#FFD700;}
+#gen-error{color:#ef4444;font-size:13px;max-width:440px;line-height:1.5;}
+#gen-error button{margin-top:12px;padding:8px 20px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:8px;color:#fff;cursor:pointer;font-size:13px;}
+
+
+/* ── API KEY MODAL ── */
+#settings-btn{position:fixed;top:60px;left:100px;z-index:160;background:rgba(10,10,18,.9);border:1.5px solid rgba(255,255,255,.25);border-radius:10px;color:#fff;font-size:12px;font-weight:700;padding:7px 12px;cursor:pointer;}
+#settings-btn:hover{background:rgba(255,255,255,.1);}
+#key-modal{position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;padding:20px;}
+#key-modal.open{display:flex;}
+#key-box{background:#141420;border:1px solid rgba(255,255,255,.15);border-radius:16px;max-width:460px;width:100%;padding:26px;}
+#key-box h3{font-size:18px;font-weight:800;color:#FFD700;margin-bottom:8px;}
+#key-box p{font-size:13px;color:rgba(255,255,255,.55);line-height:1.6;margin-bottom:14px;}
+#key-box .key-warn{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:10px 12px;font-size:12px;color:rgba(255,180,180,.85);line-height:1.5;margin-bottom:14px;}
+#key-input{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:#fff;padding:10px 12px;font-size:13px;font-family:monospace;margin-bottom:12px;outline:none;}
+#key-input:focus{border-color:rgba(255,215,0,.5);}
+.key-status{font-size:12px;margin-bottom:12px;min-height:16px;}
+.key-status.ok{color:#4ade80;}
+.key-status.bad{color:#ef4444;}
+#key-box .key-btns{display:flex;gap:8px;}
+.key-mbtn{flex:1;padding:10px;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;}
+.key-mbtn.save{background:#FFD700;color:#111;}
+.key-mbtn.clear{background:rgba(239,68,68,.15);border:1px solid #ef4444;color:#ef4444;}
+.key-mbtn.close{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#fff;}
+
 </style>
 </head>
 <body>
@@ -207,6 +262,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Se
     <p id="hud-area">Main World</p>
   </div>
 </div>
+<button id="worlds-btn" onclick="openWorldSelect()" style="position:fixed;top:60px;left:12px;z-index:160;background:rgba(10,10,18,.9);border:1.5px solid rgba(255,255,255,.25);border-radius:10px;color:#fff;font-size:12px;font-weight:700;padding:7px 14px;cursor:pointer;">🌐 Worlds</button>
 <div id="portal-hint">Walk close &amp; press F or click to enter portal</div>
 
 <!-- Slideshow presentation panel -->
@@ -313,6 +369,34 @@ const PORTALS_DATA = [
   },
 ];
 
+
+// ── REBUILD WORLD (for switching between worlds) ─────────────────
+function rebuildWorld(){
+  if(!scene) return;
+  // Remove all existing meshes except lights & camera
+  const toRemove = [];
+  scene.traverse(obj=>{
+    if(obj.isMesh || obj.isPoints || obj.isGroup || obj.isLine) toRemove.push(obj);
+  });
+  toRemove.forEach(obj=>{
+    if(obj.parent) obj.parent.remove(obj);
+    if(obj.geometry) obj.geometry.dispose();
+    if(obj.material){ if(Array.isArray(obj.material)) obj.material.forEach(m=>m.dispose()); else obj.material.dispose(); }
+  });
+  // Rebuild
+  portalMeshes = [];
+  portalRings = [];
+  buildWorld();
+  buildPortals();
+  // reset camera to spawn
+  if(camera) camera.position.set(0,1.7,18);
+  yaw = 0; pitch = 0;
+}
+
+// ── ACTIVE PORTAL SET (switchable for generated worlds) ──────────
+let activePortalSet = null; // null = use default PORTALS_DATA
+function getPortals(){ return activePortalSet || PORTALS_DATA; }
+
 // ── MAIN SCENE ────────────────────────────────────────────────────
 let renderer, scene, camera, clock;
 let portalMeshes = [], portalRings = [];
@@ -379,8 +463,9 @@ function buildWorld(){
   plaza.position.set(0,0.01,0);
   scene.add(plaza);
 
-  // Welcome sign in center
-  addSign(0,-9,"SAAHAN'S WORLD",'#FFD700','Walk into a glowing portal to explore each project');
+  // Welcome sign in center — shows the active world's name
+  const worldName = activePortalSet ? (window._activeWorldName||'MY WORLD') : "SAAHAN'S WORLD";
+  addSign(0,-9, worldName,'#FFD700','Walk into a glowing portal to explore each project');
 
   // Descriptive sign in front of each portal
   const SIGN_DESC = {
@@ -391,7 +476,7 @@ function buildWorld(){
     about: 'The story of the 12-year-old who built all this',
     myslides: 'Build your own slideshow with a PowerPoint editor'
   };
-  PORTALS_DATA.forEach(p=>{
+  getPortals().forEach(p=>{
     const sz = p.pos.z + (p.angle===0 ? 3.6 : -3.6);
     addSign(p.pos.x, sz, p.label, p.colorHex, SIGN_DESC[p.id]||p.subtitle||'', p.angle);
   });
@@ -491,7 +576,7 @@ function addSign(x,z,title,color,subtitle,rotY){
 }
 
 function buildPortals(){
-  PORTALS_DATA.forEach((p,i)=>{
+  getPortals().forEach((p,i)=>{
     const group = new THREE.Group();
     group.position.set(p.pos.x, 0, p.pos.z);
     group.rotation.y = p.angle;
@@ -581,6 +666,10 @@ let lastMX=0, lastMY=0;
 
 function setupControls(){
   document.addEventListener('keydown',e=>{
+    const t=e.target;
+    if(t && (t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable)) return;
+    if(document.getElementById('studio').classList.contains('open')) return;
+    if(document.getElementById('ss-panel').classList.contains('open')) return;
     keys[e.code]=true;
     if(e.code==='KeyF') tryEnterPortal();
     if(e.code==='KeyE') tryEnterPortal();
@@ -696,7 +785,7 @@ function hideCrosshair(){ document.getElementById('crosshair').style.display='no
 
 function getNearPortal(){
   const pos=camera.position;
-  return PORTALS_DATA.find(p=>{
+  return getPortals().find(p=>{
     const dx=p.pos.x-pos.x, dz=p.pos.z-pos.z;
     return Math.sqrt(dx*dx+dz*dz)<3.5;
   })||null;
@@ -1341,21 +1430,21 @@ function renderCanvas(){
     `;
 
     if(el.type==='text'||el.type==='heading'){
-      const inner = document.createElement('div');
+      const inner = document.createElement('textarea');
       inner.className = 'st-el-text';
-      inner.contentEditable = true;
+      inner.spellcheck = false;
       inner.style.cssText = `
         font-size:${el.fontSize}px;color:${el.color};
         font-weight:${el.bold?'bold':'normal'};
         font-style:${el.italic?'italic':'normal'};
         text-align:${el.align||'left'};
-        background:transparent;border:none;outline:none;
-        width:100%;height:100%;display:flex;align-items:center;padding:4px 6px;
-        word-break:break-word;
+        background:transparent;border:none;outline:none;resize:none;
+        width:100%;height:100%;padding:8px 10px;box-sizing:border-box;
+        overflow:hidden;line-height:1.3;font-family:inherit;
       `;
-      inner.textContent = el.text||'';
+      inner.value = el.text||'';
       inner.addEventListener('input',()=>{
-        el.text=inner.textContent;
+        el.text=inner.value;
         const pt=document.getElementById('pp-text'); if(pt) pt.value=el.text;
         clearTimeout(window._thumbTimer); window._thumbTimer=setTimeout(renderThumbs,400);
         autoSaveStudio();
@@ -1380,10 +1469,10 @@ function renderCanvas(){
       div.appendChild(handle);
     }
 
-    // Drag
+    // Drag — but NOT when clicking a text field (let the user type)
     div.addEventListener('mousedown',e=>{
       if(e.target.classList.contains('el-handle')||e.target.classList.contains('el-del')) return;
-      if(e.target.contentEditable==='true'){ selectEl(el.id); return; }
+      if(e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT'||e.target.classList.contains('st-el-text')){ selectEl(el.id); return; }
       startDrag(e,el.id);
     });
     div.addEventListener('click',e=>{ e.stopPropagation(); selectEl(el.id); });
@@ -1508,8 +1597,10 @@ function deleteSelected(){ if(stSelId) deleteEl(stSelId); }
 
 document.addEventListener('keydown', e=>{
   if(!document.getElementById('studio').classList.contains('open')) return;
-  if(e.code==='Delete'&&stSelId&&document.activeElement.contentEditable!=='true') deleteSelected();
-  if(e.code==='Escape') deselect();
+  const t=e.target;
+  const typing = t && (t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable);
+  if(e.code==='Delete'&&stSelId&&!typing) deleteSelected();
+  if(e.code==='Escape'&&!typing) deselect();
 });
 
 // ── PROPERTY APPLY ────────────────────────────────────────────────
@@ -1518,8 +1609,9 @@ function applyProp(prop){
   const div = document.getElementById('sel_'+el.id);
   if(prop==='text'){
     el.text = document.getElementById('pp-text').value;
-    if(div){ const t=div.querySelector('.st-el-text'); if(t && t.textContent!==el.text) t.textContent=el.text; }
-    renderThumbs(); autoSaveStudio(); return;
+    if(div){ const t=div.querySelector('.st-el-text'); if(t && t!==document.activeElement && t.value!==el.text) t.value=el.text; }
+    clearTimeout(window._thumbTimer); window._thumbTimer=setTimeout(renderThumbs,400);
+    autoSaveStudio(); return;
   }
   if(prop==='fontSize'){ el.fontSize=+document.getElementById('pp-fs').value; if(div){const t=div.querySelector('.st-el-text'); if(t)t.style.fontSize=el.fontSize+'px';} renderThumbs(); autoSaveStudio(); return; }
   if(prop==='color'){ el.color=document.getElementById('pp-color').value; if(div){const t=div.querySelector('.st-el-text'); if(t)t.style.color=el.color;} renderThumbs(); autoSaveStudio(); return; }
@@ -1579,17 +1671,17 @@ function clearSlide(){ stSlides[stCur].elements=[]; renderStudio(); deselect(); 
 function updateSlideInfo(){ document.getElementById('st-slide-info').textContent=`Slide ${stCur+1} of ${stSlides.length}`; }
 
 // ── SAVE/LOAD ─────────────────────────────────────────────────────
-async function saveStudio(){
+async function saveStudio(silent){
   try {
     await window.storage.set('saahan_studio', JSON.stringify({slides:stSlides,counter:stElidCounter}));
-    showStudioToast('Saved to cloud ✓');
+    if(!silent) showStudioToast('Saved to cloud ✓');
   } catch(e){
     localStorage.setItem('saahan_studio', JSON.stringify({slides:stSlides,counter:stElidCounter}));
-    showStudioToast('Saved locally ✓');
+    if(!silent) showStudioToast('Saved locally ✓');
   }
 }
 
-function autoSaveStudio(){ clearTimeout(window._stSaveTimer); window._stSaveTimer=setTimeout(saveStudio,1500); }
+function autoSaveStudio(){ clearTimeout(window._stSaveTimer); window._stSaveTimer=setTimeout(()=>saveStudio(true),1500); }
 
 async function loadStudio(){
   let data = null;
@@ -1631,6 +1723,7 @@ function openStudio(){
   canMove = false;
   document.getElementById('studio').classList.add('open');
   loadStudio().then(()=>{ buildBgSwatches(); bindCanvasClicks(); });
+  loadGeneratedWorlds();
 }
 
 function closeStudio(){
@@ -1683,6 +1776,293 @@ document.addEventListener('keydown',e=>{
 });
 
 
+// ── WORLD GENERATION + WORLD LIST ────────────────────────────────
+let generatedWorlds = [];   // [{id, name, icon, desc, portals:[{id,label,icon,colorHex,slides:[...]}]}]
+
+const GEN_STEPS = [
+  'Reading your presentation',
+  'Identifying your projects',
+  'Writing portal descriptions',
+  'Designing your world',
+  'Placing portals & signs',
+  'Building the 3D world'
+];
+
+async function loadGeneratedWorlds(){
+  try {
+    const r = await window.storage.get('saahan_worlds');
+    if(r?.value) generatedWorlds = JSON.parse(r.value);
+  } catch(e){
+    const local = localStorage.getItem('saahan_worlds');
+    if(local){ try{ generatedWorlds = JSON.parse(local); }catch(e2){} }
+  }
+}
+
+async function saveGeneratedWorlds(){
+  try {
+    await window.storage.set('saahan_worlds', JSON.stringify(generatedWorlds));
+  } catch(e){
+    localStorage.setItem('saahan_worlds', JSON.stringify(generatedWorlds));
+  }
+}
+
+// ── GENERATE WORLD FROM CURRENT PRESENTATION ──────────────────────
+async function generateWorld(){
+  if(!stSlides.length || stSlides.every(s=>!s.elements.length)){
+    alert('Add some slides with content first — the AI reads your slides to build the world.');
+    return;
+  }
+
+  const overlay = document.getElementById('gen-overlay');
+  document.getElementById('gen-active').style.display='flex';
+  document.getElementById('gen-error-box').style.display='none';
+  overlay.classList.add('open');
+  renderGenSteps(0);
+
+  // Flatten the presentation into readable text
+  const deckText = stSlides.map((sl,i)=>{
+    const parts = sl.elements
+      .filter(e=>e.type==='text'||e.type==='heading')
+      .map(e=>(e.type==='heading'?'# ':'')+ (e.text||''))
+      .filter(t=>t.trim());
+    return `--- Slide ${i+1} ---\n${parts.join('\n')}`;
+  }).join('\n\n');
+
+  const prompt = `You are helping build a 3D explorable portfolio world from a presentation. Read the presentation below and extract the projects/topics it describes.
+
+PRESENTATION:
+${deckText}
+
+Return ONLY a JSON object (no markdown, no backticks, no preamble) in exactly this shape:
+{
+  "worldName": "a short world name based on the author or theme",
+  "worldIcon": "a single emoji representing the world",
+  "worldDesc": "one sentence describing the world",
+  "portals": [
+    {
+      "label": "Project name",
+      "icon": "single emoji",
+      "colorHex": "#RRGGBB hex color that fits the project",
+      "slides": [
+        {"eyebrow":"short label","title":"slide title","body":"1-3 sentence description of this project, what it is, how it works, or its features"}
+      ]
+    }
+  ]
+}
+
+Rules:
+- Create ONE portal per distinct project or major topic in the presentation.
+- Each portal should have 2 to 4 slides describing that project (what it is, how it was built, features).
+- If the presentation only describes one project, make one portal with more detailed slides.
+- Pick a distinct colorHex per portal.
+- Keep body text factual and based only on the presentation content.
+- Aim for 2-5 portals total.`;
+
+  try {
+    const apiKey = getOpenAIKey();
+    if(!apiKey){
+      document.getElementById('gen-active').style.display='none';
+      document.getElementById('gen-error-box').style.display='block';
+      document.getElementById('gen-error').innerHTML =
+        'No OpenAI API key set. Add your key in Settings (⚙ top-right), then click Generate again.';
+      openKeyModal();
+      return;
+    }
+    renderGenSteps(1);
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":"Bearer "+apiKey
+      },
+      body:JSON.stringify({
+        model:"gpt-4o-mini",
+        max_tokens:2000,
+        messages:[
+          {role:"system",content:"You output only valid JSON. No markdown, no backticks, no commentary."},
+          {role:"user",content:prompt}
+        ]
+      })
+    });
+    renderGenSteps(3);
+    if(!response.ok){
+      const errText = await response.text();
+      throw new Error('OpenAI API error ('+response.status+'). '+(response.status===401?'Your API key looks invalid.':errText.slice(0,120)));
+    }
+    const data = await response.json();
+    let text = data.choices?.[0]?.message?.content || '';
+    text = text.replace(/```json/g,'').replace(/```/g,'').trim();
+    const spec = JSON.parse(text);
+    renderGenSteps(4);
+
+    // Build world object
+    const world = {
+      id: 'gen_'+Date.now(),
+      name: spec.worldName || 'My World',
+      icon: spec.worldIcon || '🌍',
+      desc: spec.worldDesc || 'Generated from a presentation',
+      portals: spec.portals.map((p,i)=>({
+        id: 'genp_'+i,
+        label: p.label || ('Project '+(i+1)),
+        icon: p.icon || '📦',
+        colorHex: p.colorHex || '#FFD700',
+        slides: (p.slides||[]).map(s=>({
+          eyebrow: s.eyebrow||'', title: s.title||'', body: s.body||''
+        }))
+      }))
+    };
+
+    generatedWorlds.push(world);
+    await saveGeneratedWorlds();
+    renderGenSteps(6);
+
+    setTimeout(()=>{
+      document.getElementById('gen-overlay').classList.remove('open');
+      // Jump straight into the new world
+      loadWorldById(world.id);
+    }, 700);
+
+  } catch(err){
+    document.getElementById('gen-active').style.display='none';
+    document.getElementById('gen-error-box').style.display='block';
+    document.getElementById('gen-error').textContent =
+      'Could not generate the world: '+(err.message||err)+'. Make sure your slides have text content and try again.';
+  }
+}
+
+function renderGenSteps(activeIdx){
+  const el = document.getElementById('gen-steps');
+  el.innerHTML = GEN_STEPS.map((s,i)=>`
+    <div class="gen-step ${i<activeIdx?'done':i===activeIdx?'active':''}">
+      ${i<activeIdx?'✓':i===activeIdx?'●':'○'} ${s}
+    </div>`).join('');
+  const statusEl = document.getElementById('gen-status');
+  if(statusEl && GEN_STEPS[activeIdx]) statusEl.textContent = GEN_STEPS[activeIdx]+'...';
+}
+
+// ── WORLD SELECT SCREEN ───────────────────────────────────────────
+function openWorldSelect(){
+  if(document.exitPointerLock) document.exitPointerLock();
+  canMove = false;
+  hideCrosshair();
+  document.getElementById('world-select').classList.add('open');
+  renderWorldList();
+}
+
+function closeWorldSelect(){
+  document.getElementById('world-select').classList.remove('open');
+  canMove = true;
+  showCrosshair();
+}
+
+function renderWorldList(){
+  const grid = document.getElementById('ws-grid');
+  const official = `
+    <div class="ws-card official" onclick="loadWorldById('saahan')">
+      <div class="ws-icon">🌍</div>
+      <h3>Saahan's World</h3>
+      <p>The original — Question Clash, STR Score, Insim Referral &amp; EventCommand, plus About Saahan.</p>
+      <div class="ws-portals">6 portals</div>
+    </div>`;
+  const gen = generatedWorlds.map(w=>`
+    <div class="ws-card" onclick="loadWorldById('${w.id}')">
+      <button class="ws-del" onclick="event.stopPropagation();deleteGenWorld('${w.id}')">Delete</button>
+      <div class="ws-icon">${w.icon}</div>
+      <h3>${w.name}</h3>
+      <p>${w.desc}</p>
+      <div class="ws-portals">${w.portals.length} portal${w.portals.length!==1?'s':''} · AI-generated</div>
+    </div>`).join('');
+  grid.innerHTML = official + gen;
+}
+
+async function deleteGenWorld(id){
+  generatedWorlds = generatedWorlds.filter(w=>w.id!==id);
+  await saveGeneratedWorlds();
+  renderWorldList();
+}
+
+// ── LOAD A WORLD (rebuild the 3D scene) ───────────────────────────
+function loadWorldById(id){
+  document.getElementById('world-select').classList.remove('open');
+  document.getElementById('studio').classList.remove('open');
+
+  if(id==='saahan'){
+    activePortalSet = null; // use default PORTALS_DATA
+    window._activeWorldName = null;
+  } else {
+    const world = generatedWorlds.find(w=>w.id===id);
+    if(!world) return;
+    // Convert generated world into PORTALS_DATA + PROJECT_SLIDES format
+    const portals = world.portals.map((p,i)=>{
+      // arrange portals in a circle
+      const angle = (i/world.portals.length)*Math.PI*2;
+      const radius = 16;
+      const px = Math.round(Math.cos(angle)*radius);
+      const pz = Math.round(Math.sin(angle)*radius);
+      // register slides
+      PROJECT_SLIDES[p.id] = p.slides.map(s=>({
+        bg:'#08080f', accent:p.colorHex,
+        render: ac=>`
+          <div class="sl-eyebrow" style="color:${ac}">${s.eyebrow||'Project'}</div>
+          <div class="sl-h1" style="font-size:clamp(24px,3.5vw,44px)">${s.title||''}</div>
+          <div class="sl-divider" style="background:${ac}"></div>
+          <div class="sl-sub">${(s.body||'').replace(/\n/g,'<br>')}</div>`
+      }));
+      return {
+        id:p.id, label:p.label, icon:p.icon,
+        color: parseInt(p.colorHex.replace('#','0x')),
+        colorHex:p.colorHex,
+        pos:{x:px,z:pz}, angle: angle+Math.PI,
+        subtitle: world.name,
+        stack:[], link:null
+      };
+    });
+    activePortalSet = portals;
+    window._activeWorldName = world.name.toUpperCase();
+  }
+
+  // Rebuild the scene with the chosen portals
+  rebuildWorld();
+  canMove = true;
+  showCrosshair();
+  document.getElementById('hud-area').textContent = id==='saahan'?'Saahan\'s World':generatedWorlds.find(w=>w.id===id)?.name||'World';
+}
+
+// ── OPENAI API KEY MANAGEMENT ─────────────────────────────────────
+function getOpenAIKey(){
+  return localStorage.getItem('saahan_openai_key') || '';
+}
+function openKeyModal(){
+  const inp = document.getElementById('key-input');
+  inp.value = getOpenAIKey();
+  const st = document.getElementById('key-status');
+  st.textContent = getOpenAIKey() ? '✓ A key is currently saved.' : '';
+  st.className = 'key-status ok';
+  document.getElementById('key-modal').classList.add('open');
+}
+function closeKeyModal(){ document.getElementById('key-modal').classList.remove('open'); }
+function saveKey(){
+  const val = document.getElementById('key-input').value.trim();
+  const st = document.getElementById('key-status');
+  if(!val.startsWith('sk-')){
+    st.textContent = 'That doesn\'t look like an OpenAI key (should start with "sk-").';
+    st.className = 'key-status bad';
+    return;
+  }
+  localStorage.setItem('saahan_openai_key', val);
+  st.textContent = '✓ Key saved. You can now Generate My World.';
+  st.className = 'key-status ok';
+  setTimeout(closeKeyModal, 900);
+}
+function clearKey(){
+  localStorage.removeItem('saahan_openai_key');
+  document.getElementById('key-input').value = '';
+  const st = document.getElementById('key-status');
+  st.textContent = 'Key cleared.';
+  st.className = 'key-status bad';
+}
+
+
 // ── START BUTTON ─────────────────────────────────────────────────
 function doStart(){
   const ss = document.getElementById('start-screen');
@@ -1692,6 +2072,7 @@ function doStart(){
   if(!renderer) initMain();
   canMove=true;
   setTimeout(showCrosshair,150);
+  loadGeneratedWorlds();
   // Lock the mouse to center — must run synchronously inside the click gesture
   const el=document.getElementById('c');
   if(el && el.requestPointerLock){ try{ el.requestPointerLock(); }catch(e){} }
@@ -1723,6 +2104,10 @@ document.getElementById('start-screen').addEventListener('click', doStart);
       <span class="rb-label">Deck</span>
       <button class="rb-btn" onclick="saveStudio()">💾 Save</button>
       <button class="rb-btn active" onclick="presentSlides()">▶ Present</button>
+    </div>
+    <div class="rb-group">
+      <span class="rb-label">AI</span>
+      <button class="rb-btn" style="background:linear-gradient(90deg,#7C3AED,#EC4899);border:none;color:#fff;" onclick="generateWorld()">✨ Generate My World</button>
     </div>
     <button class="rb-btn rb-exit danger" onclick="closeStudio()">✕ Exit World</button>
   </div>
@@ -1802,6 +2187,45 @@ document.getElementById('start-screen').addEventListener('click', doStart);
     <button class="pnav-btn" onclick="closePresent()" style="background:rgba(239,68,68,.2);border-color:#ef4444;">✕ Stop</button>
   </div>
   <div id="present-counter">1 / 1</div>
+</div>
+
+<!-- World Select -->
+<div id="world-select">
+  <h2>🌐 Choose a World</h2>
+  <div class="ws-sub">Explore Saahan's world, or worlds generated from presentations.</div>
+  <div class="ws-grid" id="ws-grid"></div>
+  <button class="ws-back" onclick="closeWorldSelect()">← Back</button>
+</div>
+
+<!-- Generation overlay -->
+<div id="gen-overlay">
+  <div id="gen-active" style="display:flex;flex-direction:column;align-items:center;gap:22px;">
+    <div class="gen-spinner"></div>
+    <h2>✨ Generating your world</h2>
+    <div id="gen-status">Reading your presentation...</div>
+    <div class="gen-steps" id="gen-steps"></div>
+  </div>
+  <div id="gen-error-box" style="display:none;">
+    <div id="gen-error"></div>
+    <button onclick="document.getElementById('gen-overlay').classList.remove('open')">Close</button>
+  </div>
+</div>
+
+<button id="settings-btn" onclick="openKeyModal()">⚙ Settings</button>
+<div id="key-modal">
+  <div id="key-box">
+    <h3>⚙ OpenAI API Key</h3>
+    <p>To generate worlds from your presentations, paste your OpenAI API key. It's stored only in this browser and never leaves your device except to call OpenAI directly.</p>
+    <div class="key-warn">⚠ Keep this file private. Anyone who opens a file with your key saved can use it. Don't share it publicly.</div>
+    <input id="key-input" type="password" placeholder="sk-..." autocomplete="off">
+    <div class="key-status" id="key-status"></div>
+    <div class="key-btns">
+      <button class="key-mbtn save" onclick="saveKey()">Save key</button>
+      <button class="key-mbtn clear" onclick="clearKey()">Clear</button>
+      <button class="key-mbtn close" onclick="closeKeyModal()">Close</button>
+    </div>
+    <p style="margin-top:14px;font-size:11px;color:rgba(255,255,255,.35);">Get a key at platform.openai.com/api-keys · Uses the gpt-4o-mini model (very low cost per generation).</p>
+  </div>
 </div>
 </body>
 </html>
