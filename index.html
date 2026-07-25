@@ -280,7 +280,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Se
     <p id="hud-area">Main World</p>
   </div>
 </div>
-<button id="worlds-btn" onclick="openWorldSelect()" style="position:fixed;top:60px;left:12px;z-index:160;background:rgba(10,10,18,.9);border:1.5px solid rgba(255,255,255,.25);border-radius:10px;color:#fff;font-size:12px;font-weight:700;padding:7px 14px;cursor:pointer;">🌐 Worlds</button>
+<button id="worlds-btn" onclick="openWorldSelect()" style="position:fixed;top:60px;left:12px;z-index:160;background:rgba(10,10,18,.9);border:1.5px solid rgba(255,255,255,.25);border-radius:10px;color:#fff;font-size:12px;font-weight:700;padding:7px 14px;cursor:pointer;">🌐 Worlds <span style="opacity:.5;font-size:10px;">(M)</span></button>
 <div id="portal-hint">Walk close &amp; press F or click to enter portal</div>
 
 <!-- Slideshow presentation panel -->
@@ -695,6 +695,10 @@ function setupControls(){
     keys[e.code]=true;
     if(e.code==='KeyF') tryEnterPortal();
     if(e.code==='KeyE') tryEnterPortal();
+    if(e.code==='KeyM'){
+      const ws=document.getElementById('world-select');
+      if(ws.classList.contains('open')) closeWorldSelect(); else openWorldSelect();
+    }
   });
   document.addEventListener('keyup',e=>keys[e.code]=false);
 
@@ -2143,6 +2147,13 @@ function loadWorldById(id){
   document.getElementById('hud-title').textContent = '🌍 '+wname;
   document.getElementById('hud-area').textContent = id==='saahan'?"Exploring Saahan's Projects":'Exploring '+(generatedWorlds.find(w=>w.id===id)?.name||'World');
 }
+
+// Esc closes the Worlds tab
+document.addEventListener('keydown',e=>{
+  if(e.code==='Escape' && document.getElementById('world-select').classList.contains('open')){
+    closeWorldSelect();
+  }
+});
 
 // ── START BUTTON ─────────────────────────────────────────────────
 function doStart(){
