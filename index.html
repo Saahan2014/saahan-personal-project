@@ -238,6 +238,24 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Se
 .key-mbtn.clear{background:rgba(239,68,68,.15);border:1px solid #ef4444;color:#ef4444;}
 .key-mbtn.close{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#fff;}
 
+
+/* ── DECK LIST ── */
+#deck-list-overlay{position:fixed;inset:0;z-index:520;background:rgba(8,8,18,.97);display:none;flex-direction:column;padding:24px;overflow-y:auto;}
+#deck-list-overlay.open{display:flex;}
+.dl-header{display:flex;align-items:center;gap:14px;margin-bottom:22px;}
+.dl-header h2{font-size:22px;font-weight:900;color:#FFD700;}
+.dl-header .dl-new{margin-left:auto;padding:10px 20px;background:#FFD700;color:#111;border:none;border-radius:9px;font-size:13px;font-weight:800;cursor:pointer;}
+.dl-header .dl-new:hover{background:#ffe033;}
+.dl-header .dl-close{padding:10px 18px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:9px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;}
+#deck-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:16px;}
+.deck-card{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.12);border-radius:12px;overflow:hidden;cursor:pointer;transition:.15s;position:relative;}
+.deck-card:hover{border-color:rgba(255,215,0,.5);transform:translateY(-3px);}
+.deck-thumb{width:100%;aspect-ratio:16/9;}
+.deck-name{padding:10px 12px 2px;font-size:14px;font-weight:700;color:#fff;}
+.deck-meta{padding:0 12px 12px;font-size:12px;color:rgba(255,255,255,.4);}
+.deck-del{position:absolute;top:8px;right:8px;background:rgba(239,68,68,.85);border:none;border-radius:6px;color:#fff;font-size:11px;padding:3px 9px;cursor:pointer;display:none;z-index:2;}
+.deck-card:hover .deck-del{display:block;}
+
 </style>
 </head>
 <body>
@@ -287,13 +305,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Se
   <div class="intro-inner">
     <div class="intro-eyebrow">WELCOME TO</div>
     <h1>SAAHAN'S WORLD</h1>
-    <p class="intro-tag">A first-person 3D world built by a 12-year-old who ships real software.</p>
+    <p class="intro-tag">A first-person 3D world built by a 12-year-old who ships real software. Explore the projects, build your own slideshows, and let AI turn them into worlds of their own.</p>
 
     <div class="intro-cards">
-      <div class="intro-card"><div class="ic-icon">⚡</div><h3>4 Project Portals</h3><p>Walk into glowing portals to see full presentations on Question Clash, STR Score, Insim Referral &amp; EventCommand.</p></div>
+      <div class="intro-card"><div class="ic-icon">⚡</div><h3>Project Portals</h3><p>Walk into glowing portals for full presentations on Question Clash, STR Score, Insim Referral &amp; EventCommand.</p></div>
       <div class="intro-card"><div class="ic-icon">👾</div><h3>About Saahan</h3><p>The golden portal in the center tells the story — who built all this and where it's going.</p></div>
-      <div class="intro-card"><div class="ic-icon">✏️</div><h3>Slide Studio</h3><p>A full PowerPoint-style editor inside the world. Make your own slides, save them, present them.</p></div>
-      <div class="intro-card"><div class="ic-icon">🏆</div><h3>Achievements</h3><p>Explore everything to unlock all 6 achievements. Progress saves automatically.</p></div>
+      <div class="intro-card"><div class="ic-icon">✏️</div><h3>Slide Studio</h3><p>A PowerPoint-style editor. Build slideshows, save each one to your library, and start new ones anytime.</p></div>
+      <div class="intro-card"><div class="ic-icon">✨</div><h3>AI World Builder</h3><p>Turn any slideshow into its own explorable 3D world — the AI reads your slides and builds a portal per project.</p></div>
+      <div class="intro-card"><div class="ic-icon">🌐</div><h3>Multiple Worlds</h3><p>Switch between Saahan's World and every world you've generated from the Worlds menu.</p></div>
+      <div class="intro-card"><div class="ic-icon">🏆</div><h3>Achievements</h3><p>Explore everything to unlock all 6 achievements. Your progress and creations save automatically.</p></div>
     </div>
 
     <div class="keys">
@@ -303,7 +323,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Se
       <span class="key">Esc</span><span class="keylab">release mouse</span>
     </div>
     <button id="start-btn">▶ Enter the World</button>
-    <p class="intro-note">Your mouse will lock to the screen for full first-person control. Press Esc anytime to release it.</p>
+    <p class="intro-note">Your mouse locks to the screen for first-person control. Press Esc anytime to release it. Best experienced on the live site or the downloaded file.</p>
   </div>
 </div>
 
@@ -1671,43 +1691,139 @@ function clearSlide(){ stSlides[stCur].elements=[]; renderStudio(); deselect(); 
 function updateSlideInfo(){ document.getElementById('st-slide-info').textContent=`Slide ${stCur+1} of ${stSlides.length}`; }
 
 // ── SAVE/LOAD ─────────────────────────────────────────────────────
-async function saveStudio(silent){
+// ── DECK MANAGER (multiple saved slideshows) ────────────────────
+let savedDecks = [];        // [{id, name, slides, counter, updated}]
+let currentDeckId = null;   // id of the deck being edited (null = new unsaved)
+
+async function loadDecks(){
   try {
-    await window.storage.set('saahan_studio', JSON.stringify({slides:stSlides,counter:stElidCounter}));
-    if(!silent) showStudioToast('Saved to cloud ✓');
+    const r = await window.storage.get('saahan_decks');
+    if(r?.value){ savedDecks = JSON.parse(r.value); return; }
+  } catch(e){}
+  const local = localStorage.getItem('saahan_decks');
+  if(local){ try{ savedDecks = JSON.parse(local); }catch(e){ savedDecks=[]; } }
+}
+
+async function persistDecks(){
+  try {
+    await window.storage.set('saahan_decks', JSON.stringify(savedDecks));
   } catch(e){
-    localStorage.setItem('saahan_studio', JSON.stringify({slides:stSlides,counter:stElidCounter}));
-    if(!silent) showStudioToast('Saved locally ✓');
+    localStorage.setItem('saahan_decks', JSON.stringify(savedDecks));
   }
 }
 
-function autoSaveStudio(){ clearTimeout(window._stSaveTimer); window._stSaveTimer=setTimeout(()=>saveStudio(true),1500); }
+// Save the current deck (creates or updates), files it away, then shows the deck list
+async function saveStudio(silent){
+  // require at least some content
+  const hasContent = stSlides.some(s=>s.elements.length);
+  if(!hasContent){ if(!silent) showStudioToast('Add some content first'); return; }
 
-async function loadStudio(){
-  let data = null;
-  try {
-    const r = await window.storage.get('saahan_studio');
-    if(r?.value) data = JSON.parse(r.value);
-  } catch(e){}
-  if(!data){
-    const local = localStorage.getItem('saahan_studio');
-    if(local) data = JSON.parse(local);
-  }
-  if(data?.slides?.length){
-    stSlides = data.slides;
-    stElidCounter = data.counter||0;
+  let name;
+  if(currentDeckId){
+    const existing = savedDecks.find(d=>d.id===currentDeckId);
+    name = existing?.name || 'Untitled deck';
   } else {
-    // Default welcome slide
-    stSlides = [stNewSlide('#111128')];
-    const h = stNewEl('heading',10,10);
-    h.text="My Presentation"; h.fontSize=48; h.color='#FFD700'; h.bold=true;
-    const s = stNewEl('text',10,40);
-    s.text="Click any element to edit. Use the ribbon to add more."; s.fontSize=18; s.color='rgba(255,255,255,0.7)';
-    stSlides[0].elements.push(h,s);
+    name = prompt('Name this slideshow:', 'My Slideshow '+(savedDecks.length+1));
+    if(name===null) return; // cancelled
+    if(!name.trim()) name = 'Untitled deck';
   }
+
+  const deck = {
+    id: currentDeckId || ('deck_'+Date.now()),
+    name: name.trim(),
+    slides: JSON.parse(JSON.stringify(stSlides)),
+    counter: stElidCounter,
+    updated: Date.now()
+  };
+  const idx = savedDecks.findIndex(d=>d.id===deck.id);
+  if(idx>=0) savedDecks[idx]=deck; else savedDecks.push(deck);
+  await persistDecks();
+
+  if(!silent){
+    showStudioToast('Saved "'+deck.name+'" ✓');
+    // File it away: clear the editor and show the deck list
+    setTimeout(()=>{ newDeck(); openDeckList(); }, 700);
+  }
+}
+
+// Silent autosave keeps the in-progress deck backed up under its own id
+function autoSaveStudio(){
+  clearTimeout(window._stSaveTimer);
+  window._stSaveTimer=setTimeout(async ()=>{
+    if(!currentDeckId) return; // don't autosave unnamed drafts
+    const hasContent = stSlides.some(s=>s.elements.length);
+    if(!hasContent) return;
+    const deck = savedDecks.find(d=>d.id===currentDeckId);
+    if(deck){ deck.slides=JSON.parse(JSON.stringify(stSlides)); deck.counter=stElidCounter; deck.updated=Date.now(); await persistDecks(); }
+  },1500);
+}
+
+// Start a fresh, blank deck
+function newDeck(){
+  currentDeckId = null;
+  stSlides = [stNewSlide('#111128')];
+  const h = stNewEl('heading',10,10);
+  h.text="My Presentation"; h.fontSize=48; h.color='#FFD700'; h.bold=true;
+  const s = stNewEl('text',10,40);
+  s.text="Click any element to edit. Use the ribbon to add more."; s.fontSize=18; s.color='rgba(255,255,255,0.7)';
+  stSlides[0].elements.push(h,s);
   stCur=0;
   renderStudio();
   deselect();
+}
+
+// Open an existing saved deck for editing
+function openDeck(id){
+  const deck = savedDecks.find(d=>d.id===id);
+  if(!deck) return;
+  currentDeckId = deck.id;
+  stSlides = JSON.parse(JSON.stringify(deck.slides));
+  stElidCounter = deck.counter||0;
+  stCur = 0;
+  closeDeckList();
+  renderStudio();
+  deselect();
+}
+
+async function deleteDeck(id){
+  savedDecks = savedDecks.filter(d=>d.id!==id);
+  await persistDecks();
+  renderDeckList();
+}
+
+// keep loadStudio name working (used on studio open) — starts fresh
+async function loadStudio(){
+  await loadDecks();
+  newDeck();
+}
+
+// ── DECK LIST OVERLAY ─────────────────────────────────────────────
+function openDeckList(){
+  renderDeckList();
+  document.getElementById('deck-list-overlay').classList.add('open');
+}
+function closeDeckList(){ document.getElementById('deck-list-overlay').classList.remove('open'); }
+
+function renderDeckList(){
+  const grid = document.getElementById('deck-grid');
+  if(!savedDecks.length){
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,.3);font-size:14px;padding:30px 0;">No saved slideshows yet. Create one and hit Save.</div>';
+    return;
+  }
+  grid.innerHTML = savedDecks.slice().sort((a,b)=>b.updated-a.updated).map(d=>{
+    const first = d.slides[0];
+    const bg = first?.bg || '#111128';
+    return `<div class="deck-card" onclick="openDeck('${d.id}')">
+      <button class="deck-del" onclick="event.stopPropagation();deleteDeck('${d.id}')">Delete</button>
+      <div class="deck-thumb" style="background:${bg}">
+        <svg width="100%" height="100%" viewBox="0 0 160 90" style="pointer-events:none">
+          ${(first?.elements||[]).map(el=>thumbEl(el)).join('')}
+        </svg>
+      </div>
+      <div class="deck-name">${d.name}</div>
+      <div class="deck-meta">${d.slides.length} slide${d.slides.length!==1?'s':''}</div>
+    </div>`;
+  }).join('');
 }
 
 function showStudioToast(msg){
@@ -2123,7 +2239,9 @@ document.getElementById('start-screen').addEventListener('click', doStart);
     </div>
     <div class="rb-group">
       <span class="rb-label">Deck</span>
-      <button class="rb-btn" onclick="saveStudio()">💾 Save</button>
+      <button class="rb-btn" onclick="saveStudio()">💾 Save &amp; File</button>
+      <button class="rb-btn" onclick="openDeckList()">📂 My Slideshows</button>
+      <button class="rb-btn" onclick="newDeck()">＋ New</button>
       <button class="rb-btn active" onclick="presentSlides()">▶ Present</button>
     </div>
     <div class="rb-group">
@@ -2247,6 +2365,16 @@ document.getElementById('start-screen').addEventListener('click', doStart);
     </div>
     <p style="margin-top:14px;font-size:11px;color:rgba(255,255,255,.35);">Get a key at platform.openai.com/api-keys · Uses the gpt-4o-mini model (very low cost per generation).</p>
   </div>
+</div>
+
+<!-- Deck list -->
+<div id="deck-list-overlay">
+  <div class="dl-header">
+    <h2>🎞 My Slideshows</h2>
+    <button class="dl-new" onclick="newDeck();closeDeckList();">+ New Slideshow</button>
+    <button class="dl-close" onclick="closeDeckList()">← Back to editor</button>
+  </div>
+  <div id="deck-grid"></div>
 </div>
 </body>
 </html>
