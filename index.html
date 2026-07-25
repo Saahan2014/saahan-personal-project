@@ -2350,22 +2350,6 @@ document.getElementById('start-screen').addEventListener('click', doStart);
   </div>
 </div>
 
-<button id="settings-btn" onclick="openKeyModal()">⚙ Settings</button>
-<div id="key-modal">
-  <div id="key-box">
-    <h3>⚙ OpenAI API Key</h3>
-    <p>To generate worlds from your presentations, paste your OpenAI API key. It's stored only in this browser and never leaves your device except to call OpenAI directly.</p>
-    <div class="key-warn">⚠ Keep this file private. Anyone who opens a file with your key saved can use it. Don't share it publicly.</div>
-    <input id="key-input" type="password" placeholder="sk-..." autocomplete="off">
-    <div class="key-status" id="key-status"></div>
-    <div class="key-btns">
-      <button class="key-mbtn save" onclick="saveKey()">Save key</button>
-      <button class="key-mbtn clear" onclick="clearKey()">Clear</button>
-      <button class="key-mbtn close" onclick="closeKeyModal()">Close</button>
-    </div>
-    <p style="margin-top:14px;font-size:11px;color:rgba(255,255,255,.35);">Get a key at platform.openai.com/api-keys · Uses the gpt-4o-mini model (very low cost per generation).</p>
-  </div>
-</div>
 
 <!-- Deck list -->
 <div id="deck-list-overlay">
