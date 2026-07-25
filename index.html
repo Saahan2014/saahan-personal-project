@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -1859,38 +1859,59 @@ Rules:
 - Aim for 2-5 portals total.`;
 
   try {
-    const apiKey = getOpenAIKey();
-    if(!apiKey){
-      document.getElementById('gen-active').style.display='none';
-      document.getElementById('gen-error-box').style.display='block';
-      document.getElementById('gen-error').innerHTML =
-        'No OpenAI API key set. Add your key in Settings (⚙ top-right), then click Generate again.';
-      openKeyModal();
-      return;
-    }
     renderGenSteps(1);
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json",
-        "Authorization":"Bearer "+apiKey
-      },
-      body:JSON.stringify({
-        model:"gpt-4o-mini",
-        max_tokens:2000,
-        messages:[
-          {role:"system",content:"You output only valid JSON. No markdown, no backticks, no commentary."},
-          {role:"user",content:prompt}
-        ]
-      })
-    });
-    renderGenSteps(3);
-    if(!response.ok){
-      const errText = await response.text();
-      throw new Error('OpenAI API error ('+response.status+'). '+(response.status===401?'Your API key looks invalid.':errText.slice(0,120)));
+
+    let text = '';
+    // First choice: the secure Vercel backend (/api/generate) — key stays on the server.
+    // If that isn't available (e.g. running the file locally), fall back to a
+    // browser-side key stored in Settings.
+    let usedBackend = false;
+    try {
+      const backendRes = await fetch("/api/generate", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({ prompt })
+      });
+      if(backendRes.ok){
+        const d = await backendRes.json();
+        if(d.text){ text = d.text; usedBackend = true; }
+      }
+    } catch(e){ /* backend not reachable — fall through to key mode */ }
+
+    if(!usedBackend){
+      const apiKey = getOpenAIKey();
+      if(!apiKey){
+        document.getElementById('gen-active').style.display='none';
+        document.getElementById('gen-error-box').style.display='block';
+        document.getElementById('gen-error').innerHTML =
+          'No API access found. Either deploy the /api/generate backend on Vercel, or add your OpenAI key in Settings (\u2699), then Generate again.';
+        openKeyModal();
+        return;
+      }
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          "Authorization":"Bearer "+apiKey
+        },
+        body:JSON.stringify({
+          model:"gpt-4o-mini",
+          max_tokens:2000,
+          messages:[
+            {role:"system",content:"You output only valid JSON. No markdown, no backticks, no commentary."},
+            {role:"user",content:prompt}
+          ]
+        })
+      });
+      if(!response.ok){
+        const errText = await response.text();
+        throw new Error('OpenAI API error ('+response.status+'). '+(response.status===401?'Your API key looks invalid.':errText.slice(0,120)));
+      }
+      const data = await response.json();
+      text = data.choices?.[0]?.message?.content || '';
     }
-    const data = await response.json();
-    let text = data.choices?.[0]?.message?.content || '';
+
+    renderGenSteps(3);
     text = text.replace(/```json/g,'').replace(/```/g,'').trim();
     const spec = JSON.parse(text);
     renderGenSteps(4);
@@ -2025,7 +2046,7 @@ function loadWorldById(id){
   rebuildWorld();
   canMove = true;
   showCrosshair();
-  document.getElementById('hud-area').textContent = id==='saahan'?'Saahan\'s World':generatedWorlds.find(w=>w.id===id)?.name||'World';
+  document.getElementById('hud-area').textContent = id==='saahan'?"Saahan's World":generatedWorlds.find(w=>w.id===id)?.name||'World';
 }
 
 // ── OPENAI API KEY MANAGEMENT ─────────────────────────────────────
