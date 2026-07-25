@@ -103,7 +103,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Se
 #studio.open{display:flex;}
 
 /* ribbon toolbar */
-#st-ribbon{height:48px;background:#111128;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:0;flex-shrink:0;}
+#st-ribbon{min-height:48px;background:#111128;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:0;flex-shrink:0;flex-wrap:wrap;row-gap:4px;padding:4px 0;}
 #st-ribbon .rb-logo{padding:0 16px;font-size:13px;font-weight:800;color:#FFD700;letter-spacing:1px;border-right:1px solid rgba(255,255,255,.08);white-space:nowrap;}
 #st-ribbon .rb-group{display:flex;align-items:center;gap:4px;padding:0 10px;border-right:1px solid rgba(255,255,255,.08);}
 #st-ribbon .rb-label{font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px;padding:0 3px;}
@@ -2264,20 +2264,20 @@ document.getElementById('start-screen').addEventListener('click', doStart);
     </div>
     <div class="rb-group">
       <span class="rb-label">Deck</span>
-      <button class="rb-btn" onclick="saveStudio()">💾 Save &amp; File</button>
-      <button class="rb-btn" onclick="openDeckList()">📂 My Slideshows</button>
+      <button class="rb-btn" onclick="saveStudio()">💾 Save</button>
+      <button class="rb-btn" onclick="openDeckList()">📂 Slideshows</button>
       <button class="rb-btn" onclick="newDeck()">＋ New</button>
       <button class="rb-btn active" onclick="presentSlides()">▶ Present</button>
     </div>
     <div class="rb-group">
       <span class="rb-label">Template</span>
-      <button class="rb-btn" onclick="loadAboutMeTemplate()">📝 About Me (fill in)</button>
+      <button class="rb-btn" onclick="loadAboutMeTemplate()">📝 About Me</button>
     </div>
     <div class="rb-group">
       <span class="rb-label">AI</span>
-      <button class="rb-btn" style="background:linear-gradient(90deg,#7C3AED,#EC4899);border:none;color:#fff;" onclick="generateWorld()">✨ Generate My World</button>
+      <button class="rb-btn" style="background:linear-gradient(90deg,#7C3AED,#EC4899);border:none;color:#fff;" onclick="generateWorld()">✨ Generate World</button>
     </div>
-    <button class="rb-btn rb-exit danger" onclick="closeStudio()">✕ Exit World</button>
+    <button class="rb-btn rb-exit danger" onclick="closeStudio()">✕ Exit</button>
   </div>
   <!-- Body -->
   <div id="st-body">
