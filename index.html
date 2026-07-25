@@ -1866,9 +1866,9 @@ async function deleteDeck(id){
 
 // keep loadStudio name working (used on studio open) — starts fresh
 async function loadStudio(){
-  // Show a fresh deck IMMEDIATELY (synchronous) so nothing can overwrite
-  // the user's actions later. The deck library loads in the background.
-  newDeck();
+  // Open straight into the fill-in About Me template so there's something
+  // ready to edit. The deck library loads in the background.
+  loadAboutMeTemplate();
   loadDecks(); // async, only fills the savedDecks list for "My Slideshows"
 }
 
