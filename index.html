@@ -309,6 +309,20 @@ body.mobile-mode #mobile-controls{display:block;}
 }
 @keyframes btnshine{ 0%,60%{left:-60%;} 100%{left:130%;} }
 
+
+/* ── SPAWN EXPLAINER ── */
+.spawn-explain{display:flex;gap:28px;align-items:center;flex-wrap:wrap;justify-content:center;margin:10px 0;text-align:left;}
+.spawn-diagram{position:relative;width:200px;height:200px;flex-shrink:0;}
+.sd-ring{position:absolute;inset:14px;border:2px dashed rgba(255,215,0,.35);border-radius:50%;}
+.sd-you{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;font-size:30px;}
+.sd-you span{font-size:9px;letter-spacing:1px;color:#FFD700;font-weight:800;margin-top:-2px;}
+.sd-portal{position:absolute;width:38px;height:38px;display:grid;place-items:center;font-size:20px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.25);border-radius:50%;transform:translate(-50%,-50%);}
+.sd-p1{top:6%;left:50%;} .sd-p2{top:26%;left:88%;} .sd-p3{top:74%;left:88%;}
+.sd-p4{top:94%;left:50%;} .sd-p5{top:74%;left:12%;} .sd-p6{top:26%;left:12%;}
+.spawn-text{max-width:360px;}
+.spawn-text h3{font-size:20px;font-weight:800;color:#FFD700;margin-bottom:10px;}
+.spawn-text p{font-size:14px;color:rgba(255,255,255,.65);line-height:1.6;margin-bottom:10px;}
+
 </style>
 </head>
 <body>
@@ -366,15 +380,25 @@ body.mobile-mode #mobile-controls{display:block;}
   <div class="intro-inner">
     <div class="intro-eyebrow">WELCOME TO</div>
     <h1>SAAHAN'S WORLD</h1>
-    <p class="intro-tag">A first-person 3D world built by a 12-year-old who ships real software. Explore the projects, build your own slideshows, and let AI turn them into worlds of their own.</p>
+    <p class="intro-tag">A first-person 3D world by a 12-year-old who ships real software.</p>
 
-    <div class="intro-cards">
-      <div class="intro-card"><div class="ic-icon">⚡</div><h3>Project Portals</h3><p>Walk into glowing portals for full presentations on Question Clash, STR Score, Insim Referral &amp; EventCommand.</p></div>
-      <div class="intro-card"><div class="ic-icon">👾</div><h3>About Saahan</h3><p>The golden portal in the center tells the story — who built all this and where it's going.</p></div>
-      <div class="intro-card"><div class="ic-icon">✏️</div><h3>Slide Studio</h3><p>A PowerPoint-style editor. Build slideshows, save each one to your library, and start new ones anytime.</p></div>
-      <div class="intro-card"><div class="ic-icon">✨</div><h3>AI World Builder</h3><p>Turn any slideshow into its own explorable 3D world — the AI reads your slides and builds a portal per project.</p></div>
-      <div class="intro-card"><div class="ic-icon">🌐</div><h3>Multiple Worlds</h3><p>Press <b style="color:#FFD700">M</b> anytime to open the Worlds menu and switch between Saahan's World and every world you've generated.</p></div>
-      <div class="intro-card"><div class="ic-icon">🏆</div><h3>Achievements</h3><p>Explore everything to unlock all 6 achievements. Your progress and creations save automatically.</p></div>
+    <div class="spawn-explain">
+      <div class="spawn-diagram" aria-hidden="true">
+        <div class="sd-ring"></div>
+        <div class="sd-portal sd-p1">⚡</div>
+        <div class="sd-portal sd-p2">🏠</div>
+        <div class="sd-portal sd-p3">🔗</div>
+        <div class="sd-portal sd-p4">📅</div>
+        <div class="sd-portal sd-p5">✏️</div>
+        <div class="sd-portal sd-p6">👾</div>
+        <div class="sd-you">🧍<span>YOU</span></div>
+      </div>
+      <div class="spawn-text">
+        <h3>You spawn in the center</h3>
+        <p>Every portal is arranged in a ring <b>all around you</b>. Just turn and look — you can see them all from where you start.</p>
+        <p>Walk up to any glowing portal and enter it to explore a project, read about Saahan, or open the Slide Studio.</p>
+        <p>Press <b style="color:#FFD700">M</b> anytime to switch worlds — every world puts you in the center with its portals around you.</p>
+      </div>
     </div>
 
     <div class="mode-toggle" id="mode-toggle">
@@ -486,7 +510,7 @@ function rebuildWorld(){
   buildWorld();
   buildPortals();
   // reset camera to spawn
-  if(camera) camera.position.set(0,1.7,18);
+  if(camera) camera.position.set(0,1.7,0);
   yaw = 0; pitch = 0;
 }
 
@@ -495,6 +519,23 @@ function titleCase(s){ return (s||'').split(' ').map(w=>w.charAt(0)+w.slice(1).t
 // ── ACTIVE PORTAL SET (switchable for generated worlds) ──────────
 let activePortalSet = null; // null = use default PORTALS_DATA
 function getPortals(){ return activePortalSet || PORTALS_DATA; }
+
+// Arrange a set of portals evenly in a ring around the center (spawn point).
+// Each portal faces inward toward the player. Works for any number of portals.
+function arrangeInRing(portals, radius){
+  const n = portals.length;
+  const R = radius || (n<=4 ? 13 : n<=6 ? 15 : 18);
+  portals.forEach((p,i)=>{
+    const a = (i/n)*Math.PI*2 - Math.PI/2; // start at top
+    p.pos = { x: Math.round(Math.cos(a)*R*10)/10, z: Math.round(Math.sin(a)*R*10)/10 };
+    // face the portal so its front points toward center (0,0)
+    p.angle = Math.atan2(-p.pos.x, -p.pos.z);
+  });
+  return portals;
+}
+
+// Arrange the default (Saahan's) portals in a ring at load
+arrangeInRing(PORTALS_DATA);
 
 // ── MAIN SCENE ────────────────────────────────────────────────────
 let renderer, scene, camera, clock;
@@ -515,7 +556,7 @@ function initMain(){
   scene.background = new THREE.Color(0x87ceeb);
 
   camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 200);
-  camera.position.set(0, 1.7, 18);
+  camera.position.set(0, 1.7, 0);
 
   clock = new THREE.Clock();
 
@@ -564,7 +605,7 @@ function buildWorld(){
 
   // Welcome sign in center — shows the active world's name
   const worldName = activePortalSet ? (window._activeWorldName||'MY WORLD') : "SAAHAN'S WORLD";
-  addSign(0,-9, worldName,'#FFD700','Walk into a glowing portal to explore each project');
+  // (center is the spawn point now — no sign on top of the player)
 
   // Descriptive sign in front of each portal
   const SIGN_DESC = {
@@ -576,8 +617,10 @@ function buildWorld(){
     myslides: 'Build your own slideshow with a PowerPoint editor'
   };
   getPortals().forEach(p=>{
-    const sz = p.pos.z + (p.angle===0 ? 3.6 : -3.6);
-    addSign(p.pos.x, sz, p.label, p.colorHex, SIGN_DESC[p.id]||p.subtitle||'', p.angle);
+    // place the sign a bit in front of the portal, toward the center
+    const dist = Math.hypot(p.pos.x, p.pos.z) || 1;
+    const t = Math.max(0, (dist-3.4)/dist);
+    addSign(p.pos.x*t, p.pos.z*t, p.label, p.colorHex, SIGN_DESC[p.id]||p.subtitle||'', p.angle);
   });
 }
 
@@ -2214,7 +2257,8 @@ Rules:
 - Pick a distinct colorHex per portal.
 - Keep body text factual and based only on the presentation content.
 - ALWAYS include one extra portal at the end titled "About Me" (label: "About Me", icon: a person emoji like the waving hand or bust emoji, colorHex "#FFD700"). This portal has 2-3 slides introducing the author: who they are, what they do, what they are proud of, and their goals - based on any name, personal details, or theme found in the presentation. If there are no personal details, write a friendly generic introduction that fits the projects shown.
-- Aim for 3-6 portals total (including the About Me portal).`;
+- Aim for 3-6 portals total (including the About Me portal).
+- The world is a first-person 3D space where the player spawns in the CENTER and all portals are arranged evenly in a ring around them, each facing inward. Keep the number of portals reasonable (3-6) so they fit nicely in the ring and the player can see them all from the spawn point.`;
 
   try {
     renderGenSteps(1);
@@ -2384,11 +2428,6 @@ function loadWorldById(id){
     if(!world) return;
     // Convert generated world into PORTALS_DATA + PROJECT_SLIDES format
     const portals = world.portals.map((p,i)=>{
-      // arrange portals in a circle
-      const angle = (i/world.portals.length)*Math.PI*2;
-      const radius = 16;
-      const px = Math.round(Math.cos(angle)*radius);
-      const pz = Math.round(Math.sin(angle)*radius);
       // register slides
       PROJECT_SLIDES[p.id] = p.slides.map(s=>({
         bg:'#08080f', accent:p.colorHex,
@@ -2402,11 +2441,12 @@ function loadWorldById(id){
         id:p.id, label:p.label, icon:p.icon,
         color: parseInt(p.colorHex.replace('#','0x')),
         colorHex:p.colorHex,
-        pos:{x:px,z:pz}, angle: angle+Math.PI,
+        pos:{x:0,z:0}, angle: 0,   // set by arrangeInRing below
         subtitle: world.name,
         stack:[], link:null
       };
     });
+    arrangeInRing(portals);
     activePortalSet = portals;
     window._activeWorldName = world.name.toUpperCase();
   }
