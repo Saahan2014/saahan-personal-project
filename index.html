@@ -278,6 +278,37 @@ body.mobile-mode #mobile-controls{display:block;}
 .mode-opt{padding:9px 20px;border-radius:9px;font-size:13px;font-weight:700;color:rgba(255,255,255,.55);cursor:pointer;border:none;background:transparent;transition:.15s;}
 .mode-opt.active{background:#FFD700;color:#111;}
 
+
+/* ── ENTER WORLD BUTTON ── */
+#start-btn{
+  margin-top:8px;
+  padding:16px 44px;
+  font-size:17px;
+  font-weight:800;
+  letter-spacing:.5px;
+  color:#1a1200;
+  background:linear-gradient(135deg,#FFE55C 0%,#FFD700 50%,#F5A623 100%);
+  border:none;
+  border-radius:14px;
+  cursor:pointer;
+  box-shadow:0 8px 28px rgba(255,215,0,.35), inset 0 1px 0 rgba(255,255,255,.6);
+  transition:transform .15s cubic-bezier(.34,1.56,.64,1), box-shadow .15s;
+  position:relative;
+  overflow:hidden;
+}
+#start-btn:hover{
+  transform:translateY(-2px) scale(1.03);
+  box-shadow:0 12px 36px rgba(255,215,0,.5), inset 0 1px 0 rgba(255,255,255,.6);
+}
+#start-btn:active{ transform:translateY(0) scale(.99); }
+#start-btn::after{
+  content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);
+  transform:skewX(-20deg);
+  animation:btnshine 3s ease-in-out infinite;
+}
+@keyframes btnshine{ 0%,60%{left:-60%;} 100%{left:130%;} }
+
 </style>
 </head>
 <body>
@@ -354,7 +385,7 @@ body.mobile-mode #mobile-controls{display:block;}
     <div class="keys" id="keys-desktop">
       <span class="key">W A S D</span><span class="keylab">move</span>
       <span class="key">Mouse</span><span class="keylab">look</span>
-      <span class="key">Shift</span><span class="keylab">sprint</span>
+      <span class="key">Shift</span><span class="keylab">hold to sprint</span>
       <span class="key">Space</span><span class="keylab">jump</span>
       <span class="key">F</span><span class="keylab">enter portal</span>
       <span class="key">M</span><span class="keylab">worlds</span>
@@ -363,13 +394,13 @@ body.mobile-mode #mobile-controls{display:block;}
       <span class="key">🕹 Joystick</span><span class="keylab">move</span>
       <span class="key">Drag</span><span class="keylab">look</span>
       <span class="key">⤴</span><span class="keylab">jump</span>
-      <span class="key">»</span><span class="keylab">run</span>
+      <span class="key">»</span><span class="keylab">toggle run</span>
       <span class="key">Tap</span><span class="keylab">enter portal</span>
     </div>
 
-    <button id="start-btn">▶ Enter the World</button>
+    <button id="start-btn">🎮 Enter the World</button>
     <p class="intro-note" id="intro-note-desktop">Desktop: mouse locks for first-person control, WASD to move. Press Esc to release the mouse.</p>
-    <p class="intro-note" id="intro-note-mobile" style="display:none;">Mobile: left joystick to move, drag the right side to look. Buttons for Jump, Run, Enter Portal, and Worlds.</p>
+    <p class="intro-note" id="intro-note-mobile" style="display:none;">Mobile: left joystick to move, drag the right side to look. Buttons for Jump, Run (tap to toggle 2.5x speed), Enter Portal, and Worlds.</p>
   </div>
 </div>
 
@@ -854,11 +885,7 @@ function setupControls(){
   }
   const mSprint=document.getElementById('m-sprint');
   if(mSprint){
-    mSprint.addEventListener('pointerdown',e=>{ e.preventDefault(); sprintHeld=true; mSprint.classList.add('on'); });
-    const stop=e=>{ sprintHeld=false; mSprint.classList.remove('on'); };
-    mSprint.addEventListener('pointerup',stop);
-    mSprint.addEventListener('pointercancel',stop);
-    mSprint.addEventListener('pointerleave',stop);
+    mSprint.addEventListener('pointerdown',e=>{ e.preventDefault(); toggleSprint(); });
   }
 
   canMove=true;
@@ -866,8 +893,13 @@ function setupControls(){
 
 // Joystick: drives joyX/joyY (-1..1) which the animate loop reads
 let joyX=0, joyY=0;
-let sprintHeld=false, jumpVel=0;
+let sprintOn=false, jumpVel=0;
 function doJump(){ if(canMove && camera && camera.position.y<=1.71) jumpVel=8; }
+function toggleSprint(){
+  sprintOn = !sprintOn;
+  const b=document.getElementById('m-sprint');
+  if(b) b.classList.toggle('on', sprintOn);
+}
 function setupJoystick(){
   const zone=document.getElementById('joystick-zone');
   const stick=document.getElementById('joystick-stick');
@@ -950,8 +982,8 @@ function animate(){
     if(keys['KeyA']||keys['ArrowLeft']) dir.x=-1;
     if(keys['KeyD']||keys['ArrowRight']) dir.x=1;
     if(Math.abs(joyX)>0.12 || Math.abs(joyY)>0.12){ dir.x += joyX; dir.z += joyY; }
-    const sprinting = keys['ShiftLeft']||keys['ShiftRight']||sprintHeld;
-    const speed = sprinting ? 11 : 6;
+    const shiftHeld = keys['ShiftLeft']||keys['ShiftRight'];
+    const speed = (sprintOn || shiftHeld) ? 15 : 6;
     if(dir.lengthSq()>0){
       dir.normalize().multiplyScalar(speed*dt);
       dir.applyEuler(new THREE.Euler(0,yaw,0));
@@ -2434,8 +2466,6 @@ function doStart(){
 }
 autoDetectMode();
 document.getElementById('start-btn').addEventListener('click', doStart);
-// Also allow clicking anywhere on the start screen
-document.getElementById('start-screen').addEventListener('click', doStart);
 </script>
 
 <!-- ── SLIDE STUDIO ── -->
