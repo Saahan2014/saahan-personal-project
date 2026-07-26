@@ -4,6 +4,6 @@
   "private": true,
   "description": "A first-person 3D portfolio world with AI-generated shared worlds.",
   "dependencies": {
-    "@vercel/kv": "^1.0.1"
+    "redis": "^4.6.13"
   }
 }
