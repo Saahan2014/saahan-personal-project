@@ -1,5 +1,14 @@
-// /api/saveWorld — stores a generated world in Vercel KV so everyone can see it.
-import { kv } from "@vercel/kv";
+// /api/saveWorld — stores a generated world in Redis so everyone can see it.
+import { createClient } from "redis";
+
+let client;
+async function getClient() {
+  if (client && client.isOpen) return client;
+  client = createClient({ url: process.env.REDIS_URL });
+  client.on("error", () => {});
+  await client.connect();
+  return client;
+}
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -12,6 +21,8 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Invalid world data." });
     }
 
+    const db = await getClient();
+
     // Give it a short public id
     const id = "w_" + Math.random().toString(36).slice(2, 9);
     const record = {
@@ -19,16 +30,14 @@ export default async function handler(req, res) {
       name: String(world.name).slice(0, 60),
       icon: String(world.icon || "🌍").slice(0, 8),
       desc: String(world.desc || "").slice(0, 200),
-      portals: world.portals.slice(0, 8), // cap size
+      portals: world.portals.slice(0, 8),
       created: Date.now(),
     };
 
-    // Store the world itself
-    await kv.set("world:" + id, record);
-    // Add its id to the public index (a list of all world ids)
-    await kv.lpush("world_index", id);
-    // Keep the index from growing without bound (most recent 200)
-    await kv.ltrim("world_index", 0, 199);
+    // Store the world (as JSON string) and add its id to the public index
+    await db.set("world:" + id, JSON.stringify(record));
+    await db.lPush("world_index", id);
+    await db.lTrim("world_index", 0, 199); // keep the most recent 200
 
     return res.status(200).json({ id, world: record });
   } catch (err) {
