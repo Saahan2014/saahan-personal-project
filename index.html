@@ -220,23 +220,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Se
 
 /* ── API KEY MODAL ── */
 
-
-
-
-
-
-
-#key-box 
+#key-box
 
 #key-input:focus{border-color:rgba(255,215,0,.5);}
 
-
-
-#key-box 
-
-
-
-
+#key-box
 
 
 /* ── DECK LIST ── */
@@ -1979,6 +1967,15 @@ const GEN_STEPS = [
   'Building the 3D world'
 ];
 
+// Fetch all public worlds from the shared backend
+let publicWorlds = [];
+async function loadPublicWorlds(){
+  try {
+    const res = await fetch('/api/listWorlds');
+    if(res.ok){ const d = await res.json(); publicWorlds = d.worlds || []; }
+  } catch(e){ publicWorlds = []; }
+}
+
 async function loadGeneratedWorlds(){
   try {
     const r = await window.storage.get('saahan_worlds');
@@ -2102,6 +2099,17 @@ Rules:
 
     generatedWorlds.push(world);
     await saveGeneratedWorlds();
+
+    // Also publish it to the shared backend so everyone can see it
+    try {
+      const pubRes = await fetch('/api/saveWorld', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({ world })
+      });
+      if(pubRes.ok){ const d = await pubRes.json(); if(d.id) world.publicId = d.id; }
+    } catch(e){ /* backend not deployed — world still saved locally */ }
+
     renderGenSteps(6);
 
     setTimeout(()=>{
@@ -2129,12 +2137,14 @@ function renderGenSteps(activeIdx){
 }
 
 // ── WORLD SELECT SCREEN ───────────────────────────────────────────
-function openWorldSelect(){
+async function openWorldSelect(){
   if(document.exitPointerLock) document.exitPointerLock();
   canMove = false;
   hideCrosshair();
   document.getElementById('world-select').classList.add('open');
-  renderWorldList();
+  renderWorldList();               // show what we have immediately
+  await loadPublicWorlds();        // fetch everyone's worlds
+  renderWorldList();               // re-render with the public ones
 }
 
 function closeWorldSelect(){
@@ -2152,15 +2162,38 @@ function renderWorldList(){
       <p>The original — Question Clash, STR Score, Insim Referral &amp; EventCommand, plus About Saahan.</p>
       <div class="ws-portals">6 portals</div>
     </div>`;
+
+  // Your own worlds (can be deleted locally)
   const gen = generatedWorlds.map(w=>`
     <div class="ws-card" onclick="loadWorldById('${w.id}')">
       <button class="ws-del" onclick="event.stopPropagation();deleteGenWorld('${w.id}')">Delete</button>
       <div class="ws-icon">${w.icon}</div>
       <h3>${w.name}</h3>
       <p>${w.desc}</p>
-      <div class="ws-portals">${w.portals.length} portal${w.portals.length!==1?'s':''} · AI-generated</div>
+      <div class="ws-portals">${w.portals.length} portal${w.portals.length!==1?'s':''} · Yours</div>
     </div>`).join('');
-  grid.innerHTML = official + gen;
+
+  // Public worlds from the shared backend (skip ones you already made)
+  const myPublicIds = new Set(generatedWorlds.map(w=>w.publicId).filter(Boolean));
+  const pub = publicWorlds.filter(w=>!myPublicIds.has(w.id)).map(w=>`
+    <div class="ws-card" onclick="loadPublicWorld('${w.id}')">
+      <div class="ws-icon">${w.icon}</div>
+      <h3>${w.name}</h3>
+      <p>${w.desc}</p>
+      <div class="ws-portals">${w.portals.length} portal${w.portals.length!==1?'s':''} · 🌐 Community</div>
+    </div>`).join('');
+
+  grid.innerHTML = official + gen + pub;
+}
+
+// Load a public world (from the shared backend) into the 3D scene
+function loadPublicWorld(id){
+  const world = publicWorlds.find(w=>w.id===id);
+  if(!world) return;
+  // temporarily add to generatedWorlds so loadWorldById can use it, then load
+  const temp = { ...world, id:'pub_'+id };
+  if(!generatedWorlds.find(w=>w.id===temp.id)) generatedWorlds.push(temp);
+  loadWorldById(temp.id);
 }
 
 async function deleteGenWorld(id){
