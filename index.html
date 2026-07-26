@@ -5,7 +5,2593 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Saahan's World</title>
 <style>
+*{margin:0;padding:0;box-sizing:border-box;}<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Saahan's World</title>
+<style>
 *{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Segoe UI',system-ui,sans-serif;}
+#c{display:block;width:100%;height:100%;}
+#crosshair{position:fixed;pointer-events:none;z-index:10;width:20px;height:20px;}
+#crosshair::before,#crosshair::after{content:'';position:absolute;background:rgba(255,255,255,.9);}
+#crosshair::before{width:2px;height:20px;left:9px;top:0;}
+#crosshair::after{width:20px;height:2px;top:9px;left:0;}
+#hud{position:fixed;top:0;left:0;right:0;padding:14px 18px;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none;z-index:10;}
+#hud-left{background:rgba(0,0,0,.55);padding:10px 16px;border-radius:12px;border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(8px);}
+#hud-left h1{font-size:15px;font-weight:800;color:#FFD700;letter-spacing:1px;}
+#hud-left p{font-size:12px;color:rgba(255,255,255,.55);margin-top:2px;}
+#portal-hint{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.75);color:#FFD700;font-size:14px;font-weight:700;padding:10px 22px;border-radius:12px;border:1.5px solid #FFD700;pointer-events:none;display:none;z-index:10;text-align:center;}
+/* ── SLIDESHOW PANEL ── */
+#ss-panel{position:fixed;inset:0;z-index:50;display:none;flex-direction:column;background:#000;}
+#ss-panel.open{display:flex;}
+#ss-bar{height:52px;display:flex;align-items:center;padding:0 20px;gap:14px;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0;}
+#ss-back{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:700;padding:7px 16px;border-radius:8px;cursor:pointer;}
+#ss-back:hover{background:rgba(255,255,255,.18);}
+#ss-project-name{font-size:15px;font-weight:800;letter-spacing:.5px;}
+#ss-progress{flex:1;height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;}
+#ss-progress-fill{height:100%;border-radius:2px;transition:width .35s;}
+#ss-counter{font-size:12px;color:rgba(255,255,255,.35);white-space:nowrap;}
+#ss-body{flex:1;display:flex;overflow:hidden;}
+#ss-slide{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 60px;overflow-y:auto;}
+#ss-slide-inner{width:100%;max-width:780px;}
+#ss-nav-bar{height:64px;display:flex;align-items:center;justify-content:center;gap:14px;border-top:1px solid rgba(255,255,255,.08);flex-shrink:0;}
+.ss-nav-btn{padding:10px 28px;border:1.5px solid rgba(255,255,255,.2);background:rgba(255,255,255,.07);color:#fff;font-size:14px;font-weight:700;border-radius:10px;cursor:pointer;transition:.12s;}
+.ss-nav-btn:hover{background:rgba(255,255,255,.15);}
+.ss-nav-btn:disabled{opacity:.3;cursor:default;}
+.ss-nav-btn.enter{color:#0a0a12;}
+
+/* Slide content styles */
+.sl-eyebrow{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;margin-bottom:16px;opacity:.7;}
+.sl-h1{font-size:clamp(28px,4vw,52px);font-weight:900;line-height:1.1;margin-bottom:18px;color:#fff;}
+.sl-sub{font-size:clamp(14px,1.6vw,18px);color:rgba(255,255,255,.6);line-height:1.7;margin-bottom:28px;max-width:620px;}
+.sl-divider{height:3px;width:60px;border-radius:2px;margin-bottom:32px;}
+.sl-grid{display:grid;gap:14px;margin-bottom:24px;}
+.sl-grid.cols2{grid-template-columns:1fr 1fr;}
+.sl-grid.cols3{grid-template-columns:1fr 1fr 1fr;}
+.sl-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:16px 18px;}
+.sl-card h4{font-size:13px;font-weight:700;margin-bottom:6px;}
+.sl-card p,.sl-card li{font-size:13px;color:rgba(255,255,255,.65);line-height:1.6;}
+.sl-card ul{padding-left:16px;}
+.sl-code{background:#0d1117;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:16px 20px;font-family:monospace;font-size:12px;color:#79c0ff;line-height:1.8;margin-bottom:20px;overflow-x:auto;}
+.sl-code .cm{color:#8b949e;} .sl-code .ck{color:#ff7b72;} .sl-code .cs{color:#a5d6ff;} .sl-code .cn{color:#ffa657;}
+.sl-badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;margin:3px;border:1.5px solid;}
+.sl-feat{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;}
+.sl-feat-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.sl-feat-text h5{font-size:13px;font-weight:700;margin-bottom:2px;color:#fff;}
+.sl-feat-text p{font-size:12px;color:rgba(255,255,255,.55);line-height:1.5;}
+.sl-security{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;}
+.sl-security-icon{font-size:20px;flex-shrink:0;}
+.sl-security p{font-size:13px;color:rgba(255,200,200,.8);line-height:1.6;}
+.sl-flow{display:flex;align-items:center;gap:0;flex-wrap:wrap;margin-bottom:20px;}
+.sl-flow-step{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:10px 14px;font-size:12px;font-weight:600;color:#fff;white-space:nowrap;}
+.sl-flow-arrow{color:rgba(255,255,255,.25);font-size:18px;padding:0 6px;}
+
+/* ── ACHIEVEMENTS ── */
+#ach-toast{position:fixed;top:70px;right:20px;z-index:500;display:flex;flex-direction:column;gap:10px;pointer-events:none;}
+.ach-pop{background:rgba(10,8,0,.95);border:1.5px solid #FFD700;border-radius:14px;padding:14px 18px;display:flex;align-items:center;gap:14px;min-width:280px;box-shadow:0 0 30px rgba(255,215,0,.2);animation:achIn .4s cubic-bezier(.34,1.56,.64,1) forwards;}
+@keyframes achIn{from{transform:translateX(120%);opacity:0;}to{transform:translateX(0);opacity:1;}}
+.ach-pop.out{animation:achOut .35s ease-in forwards;}
+@keyframes achOut{to{transform:translateX(120%);opacity:0;}}
+.ach-icon{font-size:32px;flex-shrink:0;}
+.ach-text h4{font-size:12px;color:#FFD700;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:2px;}
+.ach-text p{font-size:13px;color:#fff;font-weight:600;}
+.ach-text small{font-size:11px;color:rgba(255,255,255,.4);}
+#ach-log{position:fixed;top:52px;right:0;width:300px;background:rgba(10,10,18,.97);border-left:1px solid rgba(255,255,255,.08);height:calc(100%-52px);transform:translateX(100%);transition:.3s;z-index:150;overflow-y:auto;padding:18px;}
+#ach-log.open{transform:translateX(0);}
+#ach-toggle{position:fixed;top:60px;right:12px;z-index:160;background:rgba(10,10,18,.9);border:1.5px solid rgba(255,215,0,.4);border-radius:10px;color:#FFD700;font-size:12px;font-weight:700;padding:7px 14px;cursor:pointer;}
+#ach-toggle:hover{background:rgba(255,215,0,.1);}
+.ach-entry{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06);}
+.ach-entry .ae-icon{font-size:24px;width:36px;text-align:center;}
+.ach-entry .ae-info h5{font-size:13px;font-weight:700;color:#fff;margin-bottom:2px;}
+.ach-entry .ae-info p{font-size:12px;color:rgba(255,255,255,.4);}
+.ach-entry.locked{opacity:.3;filter:grayscale(1);}
+.sl-img-mock{border-radius:12px;border:1px solid rgba(255,255,255,.12);overflow:hidden;margin-bottom:20px;}
+#start-screen{position:fixed;inset:0;z-index:600;background:linear-gradient(160deg,#0a0a1a 0%,#141033 45%,#1e1145 100%);display:flex;align-items:center;justify-content:center;overflow-y:auto;padding:30px 20px;}
+.intro-inner{max-width:760px;width:100%;text-align:center;display:flex;flex-direction:column;align-items:center;gap:18px;}
+.intro-eyebrow{font-size:12px;letter-spacing:6px;color:rgba(255,215,0,.6);font-weight:700;}
+#start-screen h1{font-size:clamp(36px,6vw,58px);font-weight:900;color:#FFD700;text-shadow:0 0 50px #FFD70055;letter-spacing:2px;line-height:1;}
+.intro-tag{font-size:clamp(14px,2vw,17px);color:rgba(255,255,255,.65);line-height:1.6;max-width:480px;}
+.intro-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;width:100%;margin:8px 0;}
+.intro-card{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:16px 14px;text-align:left;}
+.intro-card .ic-icon{font-size:26px;margin-bottom:8px;}
+.intro-card h3{font-size:13px;font-weight:700;color:#fff;margin-bottom:5px;}
+.intro-card p{font-size:12px;color:rgba(255,255,255,.5);line-height:1.55;}
+.keylab{color:rgba(255,255,255,.4);font-size:13px;align-self:center;}
+.intro-note{font-size:12px;color:rgba(255,255,255,.35);}
+.keys{display:flex;gap:8px;margin-top:4px;}
+.key{background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.3);border-radius:6px;padding:4px 10px;font-size:12px;color:#fff;font-family:monospace;}
+
+
+/* ── SLIDE STUDIO (PowerPoint-style editor) ── */
+#studio{position:fixed;inset:0;z-index:500;display:none;flex-direction:column;background:#1a1a2e;font-family:'Segoe UI',system-ui,sans-serif;}
+#studio.open{display:flex;}
+
+/* ribbon toolbar */
+#st-ribbon{min-height:48px;background:#111128;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:0;flex-shrink:0;flex-wrap:wrap;row-gap:4px;padding:4px 0;}
+#st-ribbon .rb-logo{padding:0 16px;font-size:13px;font-weight:800;color:#FFD700;letter-spacing:1px;border-right:1px solid rgba(255,255,255,.08);white-space:nowrap;}
+#st-ribbon .rb-group{display:flex;align-items:center;gap:4px;padding:0 10px;border-right:1px solid rgba(255,255,255,.08);}
+#st-ribbon .rb-label{font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px;padding:0 3px;}
+.rb-btn{height:30px;padding:0 10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:.1s;display:flex;align-items:center;gap:5px;}
+.rb-btn:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25);}
+.rb-btn.active{background:#FFD700;color:#111;border-color:#FFD700;}
+.rb-btn.danger:hover{background:rgba(239,68,68,.15);border-color:#ef4444;color:#ef4444;}
+.rb-sep{width:1px;height:20px;background:rgba(255,255,255,.08);margin:0 2px;}
+.rb-select{height:28px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:6px;color:#fff;font-size:12px;padding:0 6px;cursor:pointer;outline:none;}
+.rb-select option{background:#1a1a2e;}
+.rb-colorpick{width:28px;height:28px;border:none;border-radius:6px;cursor:pointer;padding:0;}
+#st-ribbon .rb-exit{margin-left:auto;margin-right:10px;}
+
+/* main body */
+#st-body{flex:1;display:flex;overflow:hidden;}
+
+/* slide list panel */
+#st-slides-panel{width:180px;background:#111128;border-right:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;flex-shrink:0;}
+#st-slides-panel .sp-header{padding:10px 12px;font-size:11px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid rgba(255,255,255,.06);}
+#st-slide-thumbs{flex:1;overflow-y:auto;padding:8px;}
+#st-slide-thumbs::-webkit-scrollbar{width:3px;}
+#st-slide-thumbs::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);}
+.slide-thumb{width:100%;aspect-ratio:16/9;border-radius:6px;border:2px solid transparent;cursor:pointer;margin-bottom:6px;position:relative;overflow:hidden;transition:.12s;display:flex;align-items:center;justify-content:center;}
+.slide-thumb:hover{border-color:rgba(255,255,255,.3);}
+.slide-thumb.active{border-color:#FFD700;}
+.slide-thumb .thumb-num{position:absolute;top:3px;left:4px;font-size:9px;color:rgba(255,255,255,.5);font-weight:700;}
+.slide-thumb .thumb-del{position:absolute;top:2px;right:3px;background:rgba(239,68,68,.7);border:none;border-radius:3px;color:#fff;font-size:9px;cursor:pointer;padding:1px 4px;display:none;}
+.slide-thumb:hover .thumb-del{display:block;}
+#sp-add-btn{margin:8px;padding:8px;background:rgba(255,215,0,.12);border:1.5px dashed rgba(255,215,0,.4);border-radius:6px;color:#FFD700;font-size:12px;font-weight:700;cursor:pointer;text-align:center;}
+#sp-add-btn:hover{background:rgba(255,215,0,.2);}
+
+/* canvas area */
+#st-canvas-area{flex:1;display:flex;align-items:center;justify-content:center;background:#0d0d1a;overflow:hidden;position:relative;}
+#st-slide-canvas{width:min(90%,800px);aspect-ratio:16/9;border-radius:10px;box-shadow:0 0 60px rgba(0,0,0,.6);position:relative;overflow:hidden;cursor:text;}
+#st-slide-canvas .el-layer{position:absolute;inset:0;}
+
+/* element tools */
+.st-el{position:absolute;cursor:move;border:1.5px solid transparent;border-radius:4px;}
+.st-el:hover{border-color:rgba(255,255,255,.3);}
+.st-el.selected{border-color:#FFD700;border-style:solid;}
+.st-el .el-handle{position:absolute;bottom:-5px;right:-5px;width:10px;height:10px;background:#FFD700;border-radius:2px;cursor:se-resize;}
+.st-el .el-del{position:absolute;top:-10px;right:-10px;width:18px;height:18px;background:#ef4444;border:none;border-radius:50%;color:#fff;font-size:10px;cursor:pointer;display:none;align-items:center;justify-content:center;}
+.st-el.selected .el-del{display:flex;}
+.st-el-text{outline:none;width:100%;height:100%;padding:8px 10px;box-sizing:border-box;line-height:1.3;resize:none;font-family:inherit;overflow:hidden;}
+.st-el-img{width:100%;height:100%;object-fit:cover;border-radius:3px;pointer-events:none;}
+
+/* properties panel */
+#st-props{width:220px;background:#111128;border-left:1px solid rgba(255,255,255,.08);overflow-y:auto;flex-shrink:0;}
+#st-props::-webkit-scrollbar{width:3px;}
+#st-props::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);}
+.prop-section{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.06);}
+.prop-section h4{font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;}
+.prop-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.prop-label{font-size:11px;color:rgba(255,255,255,.45);width:52px;flex-shrink:0;}
+.prop-input{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:5px;color:#fff;padding:4px 7px;font-size:12px;outline:none;}
+.prop-input:focus{border-color:rgba(255,215,0,.5);}
+.prop-slider{flex:1;accent-color:#FFD700;}
+.prop-val{font-size:11px;color:#FFD700;width:30px;text-align:right;}
+.prop-color{width:32px;height:24px;border:none;border-radius:4px;cursor:pointer;flex-shrink:0;}
+.prop-swatch-row{display:flex;gap:5px;flex-wrap:wrap;}
+.prop-swatch{width:22px;height:22px;border-radius:4px;cursor:pointer;border:2px solid transparent;}
+.prop-swatch:hover,.prop-swatch.sel{border-color:#fff;transform:scale(1.1);}
+.prop-font-row{display:flex;gap:4px;}
+.prop-font-btn{flex:1;padding:4px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:4px;color:#fff;font-size:11px;cursor:pointer;}
+.prop-font-btn.active{background:#FFD700;color:#111;border-color:#FFD700;}
+#st-no-sel{padding:20px;font-size:12px;color:rgba(255,255,255,.25);text-align:center;line-height:1.6;}
+
+/* bottom bar */
+#st-bottom{height:28px;background:#111128;border-top:1px solid rgba(255,255,255,.06);display:flex;align-items:center;padding:0 14px;gap:20px;font-size:11px;color:rgba(255,255,255,.3);}
+
+/* present mode */
+#present-mode{position:fixed;inset:0;z-index:600;background:#000;display:none;cursor:none;}
+#present-mode.open{display:flex;align-items:center;justify-content:center;}
+#present-slide{width:min(96vw,960px);aspect-ratio:16/9;position:relative;overflow:hidden;border-radius:6px;}
+#present-nav{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:10;}
+.pnav-btn{padding:8px 20px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;}
+.pnav-btn:hover{background:rgba(255,255,255,.2);}
+#present-counter{position:fixed;top:14px;right:20px;font-size:13px;color:rgba(255,255,255,.4);z-index:10;}
+
+
+/* ── WORLD SELECT ── */
+#world-select{position:fixed;inset:0;z-index:550;background:linear-gradient(160deg,#0a0a1a,#141033,#1e1145);display:none;flex-direction:column;align-items:center;justify-content:center;padding:30px 20px;overflow-y:auto;}
+#world-select.open{display:flex;}
+#world-select h2{font-size:clamp(26px,4vw,40px);font-weight:900;color:#FFD700;margin-bottom:6px;letter-spacing:1px;}
+#world-select .ws-sub{font-size:14px;color:rgba(255,255,255,.5);margin-bottom:26px;text-align:center;}
+.ws-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;max-width:760px;width:100%;}
+.ws-card{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:22px 18px;cursor:pointer;transition:.15s;text-align:left;position:relative;}
+.ws-card:hover{border-color:rgba(255,215,0,.5);background:rgba(255,255,255,.08);transform:translateY(-3px);}
+.ws-card .ws-icon{font-size:34px;margin-bottom:10px;}
+.ws-card h3{font-size:17px;font-weight:800;color:#fff;margin-bottom:5px;}
+.ws-card p{font-size:12px;color:rgba(255,255,255,.5);line-height:1.5;}
+.ws-card .ws-portals{margin-top:12px;font-size:11px;color:#FFD700;font-weight:700;}
+.ws-card .ws-del{position:absolute;top:12px;right:12px;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:#ef4444;border-radius:6px;font-size:11px;padding:3px 8px;cursor:pointer;display:none;}
+.ws-card:hover .ws-del{display:block;}
+.ws-card.official{border-color:rgba(255,215,0,.3);}
+.ws-card.official::after{content:'★ Featured';position:absolute;top:12px;right:12px;font-size:10px;color:#FFD700;font-weight:700;letter-spacing:1px;}
+.ws-back{margin-top:24px;padding:11px 26px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;}
+.ws-back:hover{background:rgba(255,255,255,.15);}
+
+/* ── GENERATION OVERLAY ── */
+#gen-overlay{position:fixed;inset:0;z-index:700;background:rgba(5,5,15,.96);display:none;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:30px;text-align:center;}
+#gen-overlay.open{display:flex;}
+#gen-overlay .gen-spinner{width:60px;height:60px;border:4px solid rgba(255,215,0,.15);border-top-color:#FFD700;border-radius:50%;animation:genspin 0.9s linear infinite;}
+@keyframes genspin{to{transform:rotate(360deg);}}
+#gen-overlay h2{font-size:24px;font-weight:900;color:#FFD700;}
+#gen-status{font-size:14px;color:rgba(255,255,255,.6);min-height:22px;max-width:440px;line-height:1.5;}
+#gen-overlay .gen-steps{display:flex;flex-direction:column;gap:8px;margin-top:6px;font-size:13px;color:rgba(255,255,255,.4);text-align:left;}
+.gen-step{display:flex;align-items:center;gap:8px;}
+.gen-step.done{color:#4ade80;}
+.gen-step.active{color:#FFD700;}
+#gen-error{color:#ef4444;font-size:13px;max-width:440px;line-height:1.5;}
+#gen-error button{margin-top:12px;padding:8px 20px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:8px;color:#fff;cursor:pointer;font-size:13px;}
+
+
+/* ── API KEY MODAL ── */
+
+
+
+
+
+
+
+#key-box 
+
+#key-input:focus{border-color:rgba(255,215,0,.5);}
+
+
+
+#key-box 
+
+
+
+
+
+
+/* ── DECK LIST ── */
+#deck-list-overlay{position:fixed;inset:0;z-index:520;background:rgba(8,8,18,.97);display:none;flex-direction:column;padding:24px;overflow-y:auto;}
+#deck-list-overlay.open{display:flex;}
+.dl-header{display:flex;align-items:center;gap:14px;margin-bottom:22px;}
+.dl-header h2{font-size:22px;font-weight:900;color:#FFD700;}
+.dl-header .dl-new{margin-left:auto;padding:10px 20px;background:#FFD700;color:#111;border:none;border-radius:9px;font-size:13px;font-weight:800;cursor:pointer;}
+.dl-header .dl-new:hover{background:#ffe033;}
+.dl-header .dl-close{padding:10px 18px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:9px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;}
+#deck-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:16px;}
+.deck-card{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.12);border-radius:12px;overflow:hidden;cursor:pointer;transition:.15s;position:relative;}
+.deck-card:hover{border-color:rgba(255,215,0,.5);transform:translateY(-3px);}
+.deck-thumb{width:100%;aspect-ratio:16/9;}
+.deck-name{padding:10px 12px 2px;font-size:14px;font-weight:700;color:#fff;}
+.deck-meta{padding:0 12px 12px;font-size:12px;color:rgba(255,255,255,.4);}
+.deck-del{position:absolute;top:8px;right:8px;background:rgba(239,68,68,.85);border:none;border-radius:6px;color:#fff;font-size:11px;padding:3px 9px;cursor:pointer;display:none;z-index:2;}
+.deck-card:hover .deck-del{display:block;}
+
+
+/* ── MOBILE CONTROLS ── */
+#mobile-controls{display:none;}
+body.mobile-mode #mobile-controls{display:block;}
+#joystick-zone{position:fixed;bottom:24px;left:24px;width:130px;height:130px;z-index:55;touch-action:none;}
+#joystick-base{position:absolute;inset:0;border-radius:50%;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.2);backdrop-filter:blur(4px);}
+#joystick-stick{position:absolute;top:50%;left:50%;width:56px;height:56px;margin:-28px 0 0 -28px;border-radius:50%;background:rgba(255,215,0,.75);border:2px solid #fff;box-shadow:0 2px 12px rgba(0,0,0,.4);transition:transform .05s;}
+#look-hint{position:fixed;bottom:30px;right:50%;transform:translateX(50%);font-size:12px;color:rgba(255,255,255,.35);z-index:55;pointer-events:none;}
+#mobile-actions{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:12px;z-index:55;}
+.m-action{width:82px;height:82px;border-radius:50%;background:rgba(255,215,0,.85);border:2px solid #fff;color:#111;font-size:13px;font-weight:800;line-height:1.15;cursor:pointer;touch-action:none;user-select:none;box-shadow:0 3px 14px rgba(0,0,0,.4);}
+.m-action:active{transform:scale(.92);}
+.m-action.m-secondary{width:64px;height:64px;background:rgba(20,20,40,.9);color:#fff;border-color:rgba(255,255,255,.35);font-size:12px;align-self:center;}
+.m-action.hidden{opacity:.35;pointer-events:none;}
+.m-action.m-jump{width:64px;height:64px;background:rgba(59,130,246,.85);color:#fff;border-color:#fff;font-size:12px;}
+.m-action.m-sprint{width:64px;height:64px;background:rgba(34,197,94,.85);color:#fff;border-color:#fff;font-size:12px;}
+.m-action.m-sprint.on{background:#16a34a;box-shadow:0 0 16px rgba(34,197,94,.7);}
+
+/* mode toggle on intro */
+.mode-toggle{display:flex;gap:0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:4px;margin:4px 0;}
+.mode-opt{padding:9px 20px;border-radius:9px;font-size:13px;font-weight:700;color:rgba(255,255,255,.55);cursor:pointer;border:none;background:transparent;transition:.15s;}
+.mode-opt.active{background:#FFD700;color:#111;}
+
+</style>
+</head>
+<body>
+<canvas id="c" style="cursor:none;"></canvas>
+
+<!-- Mobile touch controls (shown only in mobile mode) -->
+<div id="mobile-controls">
+  <!-- Movement joystick (left) -->
+  <div id="joystick-zone">
+    <div id="joystick-base">
+      <div id="joystick-stick"></div>
+    </div>
+  </div>
+  <!-- Look area label (right side is drag-to-look via canvas) -->
+  <div id="look-hint">drag to look</div>
+  <!-- Action buttons (right) -->
+  <div id="mobile-actions">
+    <button class="m-action" id="m-enter">Enter<br>Portal</button>
+    <div style="display:flex;gap:10px;">
+      <button class="m-action m-jump" id="m-jump">⤴<br>Jump</button>
+      <button class="m-action m-sprint" id="m-sprint">»<br>Run</button>
+    </div>
+    <button class="m-action m-secondary" id="m-worlds">🌐<br>Worlds</button>
+  </div>
+</div>
+<div id="crosshair"></div>
+<div id="hud">
+  <div id="hud-left">
+    <h1 id="hud-title">🌍 SAAHAN'S WORLD</h1>
+    <p id="hud-area">Main World</p>
+  </div>
+</div>
+<button id="worlds-btn" onclick="openWorldSelect()" style="position:fixed;top:60px;left:12px;z-index:160;background:rgba(10,10,18,.9);border:1.5px solid rgba(255,255,255,.25);border-radius:10px;color:#fff;font-size:12px;font-weight:700;padding:7px 14px;cursor:pointer;">🌐 Worlds <span style="opacity:.5;font-size:10px;">(M)</span></button>
+<div id="portal-hint">Walk close &amp; press F or click to enter portal</div>
+
+<!-- Slideshow presentation panel -->
+<div id="ss-panel">
+  <div id="ss-bar">
+    <button id="ss-back">← Back to World</button>
+    <div id="ss-project-name"></div>
+    <div id="ss-progress"><div id="ss-progress-fill"></div></div>
+    <div id="ss-counter">1 / 1</div>
+  </div>
+  <div id="ss-body">
+    <div id="ss-slide"><div id="ss-slide-inner"></div></div>
+  </div>
+  <div id="ss-nav-bar">
+    <button class="ss-nav-btn" id="ss-prev">← Prev</button>
+    <button class="ss-nav-btn" id="ss-next">Next →</button>
+  </div>
+</div>
+
+<!-- Intro page -->
+<div id="start-screen">
+  <div class="intro-inner">
+    <div class="intro-eyebrow">WELCOME TO</div>
+    <h1>SAAHAN'S WORLD</h1>
+    <p class="intro-tag">A first-person 3D world built by a 12-year-old who ships real software. Explore the projects, build your own slideshows, and let AI turn them into worlds of their own.</p>
+
+    <div class="intro-cards">
+      <div class="intro-card"><div class="ic-icon">⚡</div><h3>Project Portals</h3><p>Walk into glowing portals for full presentations on Question Clash, STR Score, Insim Referral &amp; EventCommand.</p></div>
+      <div class="intro-card"><div class="ic-icon">👾</div><h3>About Saahan</h3><p>The golden portal in the center tells the story — who built all this and where it's going.</p></div>
+      <div class="intro-card"><div class="ic-icon">✏️</div><h3>Slide Studio</h3><p>A PowerPoint-style editor. Build slideshows, save each one to your library, and start new ones anytime.</p></div>
+      <div class="intro-card"><div class="ic-icon">✨</div><h3>AI World Builder</h3><p>Turn any slideshow into its own explorable 3D world — the AI reads your slides and builds a portal per project.</p></div>
+      <div class="intro-card"><div class="ic-icon">🌐</div><h3>Multiple Worlds</h3><p>Press <b style="color:#FFD700">M</b> anytime to open the Worlds menu and switch between Saahan's World and every world you've generated.</p></div>
+      <div class="intro-card"><div class="ic-icon">🏆</div><h3>Achievements</h3><p>Explore everything to unlock all 6 achievements. Your progress and creations save automatically.</p></div>
+    </div>
+
+    <div class="mode-toggle" id="mode-toggle">
+      <button class="mode-opt active" id="mode-desktop" onclick="setMode('desktop')">🖥 Desktop</button>
+      <button class="mode-opt" id="mode-mobile" onclick="setMode('mobile')">📱 Mobile</button>
+    </div>
+
+    <div class="keys" id="keys-desktop">
+      <span class="key">W A S D</span><span class="keylab">move</span>
+      <span class="key">Mouse</span><span class="keylab">look</span>
+      <span class="key">Shift</span><span class="keylab">sprint</span>
+      <span class="key">Space</span><span class="keylab">jump</span>
+      <span class="key">F</span><span class="keylab">enter portal</span>
+      <span class="key">M</span><span class="keylab">worlds</span>
+    </div>
+    <div class="keys" id="keys-mobile" style="display:none;">
+      <span class="key">🕹 Joystick</span><span class="keylab">move</span>
+      <span class="key">Drag</span><span class="keylab">look</span>
+      <span class="key">⤴</span><span class="keylab">jump</span>
+      <span class="key">»</span><span class="keylab">run</span>
+      <span class="key">Tap</span><span class="keylab">enter portal</span>
+    </div>
+
+    <button id="start-btn">▶ Enter the World</button>
+    <p class="intro-note" id="intro-note-desktop">Desktop: mouse locks for first-person control, WASD to move. Press Esc to release the mouse.</p>
+    <p class="intro-note" id="intro-note-mobile" style="display:none;">Mobile: left joystick to move, drag the right side to look. Buttons for Jump, Run, Enter Portal, and Worlds.</p>
+  </div>
+</div>
+
+<div id="ach-toast"></div>
+<button id="ach-toggle" onclick="toggleAchLog()">🏆 <span id="ach-count">0</span>/6</button>
+<div id="ach-log">
+  <div style="font-size:15px;font-weight:800;color:#FFD700;margin-bottom:14px;">🏆 Achievements</div>
+  <div id="ach-list"></div>
+</div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ── PORTALS DATA ──────────────────────────────────────────────────
+const PORTALS_DATA = [
+  {
+    id:'qc', label:'Question Clash', icon:'⚡', color:0xF59E0B, colorHex:'#F59E0B',
+    pos:{x:-12,z:-18}, angle:0,
+    subtitle:'Educational Battle Game · Built by Saahan Chadha',
+    what:'Students answer questions across all grade levels to earn Energy Points. Those points power mini-game turns as a scientist who upgrades scrap into weapons and gear.',
+    built:'Full game loop with PvP arena, Silver + Clash Cash dual-currency, CogAT & Issaquah Path D test prep, Challenge Questions worth 50 Clash Cash, and a 3D scientist upgrade workshop.',
+    stack:[['Game Design','#F59E0B'],['PvP Engine','#EF4444'],['Dual Currency','#22C55E'],['CogAT Prep','#3B82F6'],['EdTech','#A78BFA']],
+    link:'#', linkText:'Play Question Clash'
+  },
+  {
+    id:'str', label:'STR Score', icon:'🏠', color:0x22C55E, colorHex:'#22C55E',
+    pos:{x:12,z:-18}, angle:0,
+    subtitle:'AI Property Analysis · InsimProperties',
+    what:'AI-powered tool that analyses any address and instantly generates a full Short-Term Rental score PDF report. Wired into the InsimProperties website for zero-friction delivery.',
+    built:'ChatGPT agent connected to InsimProperties via a Render backend. Resend handles email with proper DKIM/SPF on GoDaddy — PDF hits the inbox the moment the form is submitted.',
+    stack:[['ChatGPT Agent','#22C55E'],['OpenAI API','#22C55E'],['Render Server','#3B82F6'],['PDF Gen','#F59E0B'],['Email Delivery','#EC4899']],
+    link:'#', linkText:'Visit InsimProperties'
+  },
+  {
+    id:'ref', label:'Insim Referral', icon:'🔗', color:0x3B82F6, colorHex:'#3B82F6',
+    pos:{x:-12,z:6}, angle:Math.PI,
+    subtitle:'Client Referral Platform · InsimProperties',
+    what:'Clients get a unique referral link, track who they\'ve referred, and watch rewards build in a real-time ledger dashboard. A loyalty + growth engine for property consulting.',
+    built:'Google Sheets as the DB (via Apps Script), unique code generation, ledger-style reward tracker, admin panel. Debugged multi-sheet deployments, header row conflicts, and live syncing.',
+    stack:[['Google Sheets','#22C55E'],['Apps Script','#F59E0B'],['Unique Codes','#3B82F6'],['Admin Panel','#EC4899'],['Real-time','#A78BFA']],
+    link:'#', linkText:'Open Referral App'
+  },
+  {
+    id:'about', label:'About Saahan', icon:'👾', color:0xFFD700, colorHex:'#FFD700',
+    pos:{x:0,z:0}, angle:0,
+    subtitle:'Student · Entrepreneur · Builder',
+  },
+
+  {
+    id:'ec', label:'EventCommand', icon:'📅', color:0xEC4899, colorHex:'#EC4899',
+    pos:{x:12,z:6}, angle:Math.PI,
+    subtitle:'AI Event Management · Deployed on Vercel',
+    what:'Command center for running events — attendees, budgets, volunteers, vendors, announcements, all in one dashboard. Real accounts with per-user data isolation.',
+    built:'React SPA with Supabase auth + DB, deployed on Vercel. Per-account event isolation, Edit/Delete menus, rotated leaked keys, secured .env. AI features structured for real API drop-in.',
+    stack:[['React','#3B82F6'],['Supabase','#22C55E'],['Vercel','#fff'],['Auth System','#F59E0B'],['AI Features','#EC4899']],
+    link:'#', linkText:'Open EventCommand'
+  },
+  {
+    id:'myslides', label:'Slide Studio', icon:'✏️', color:0xFFD700, colorHex:'#FFD700',
+    pos:{x:0,z:-30}, angle:0,
+    subtitle:'Build your own slideshow',
+    stack:[], link:null
+  },
+];
+
+
+// ── REBUILD WORLD (for switching between worlds) ─────────────────
+function rebuildWorld(){
+  if(!scene) return;
+  // Remove all existing meshes except lights & camera
+  const toRemove = [];
+  scene.traverse(obj=>{
+    if(obj.isMesh || obj.isPoints || obj.isGroup || obj.isLine) toRemove.push(obj);
+  });
+  toRemove.forEach(obj=>{
+    if(obj.parent) obj.parent.remove(obj);
+    if(obj.geometry) obj.geometry.dispose();
+    if(obj.material){ if(Array.isArray(obj.material)) obj.material.forEach(m=>m.dispose()); else obj.material.dispose(); }
+  });
+  // Rebuild
+  portalMeshes = [];
+  portalRings = [];
+  buildWorld();
+  buildPortals();
+  // reset camera to spawn
+  if(camera) camera.position.set(0,1.7,18);
+  yaw = 0; pitch = 0;
+}
+
+function titleCase(s){ return (s||'').split(' ').map(w=>w.charAt(0)+w.slice(1).toLowerCase()).join(' '); }
+
+// ── ACTIVE PORTAL SET (switchable for generated worlds) ──────────
+let activePortalSet = null; // null = use default PORTALS_DATA
+function getPortals(){ return activePortalSet || PORTALS_DATA; }
+
+// ── MAIN SCENE ────────────────────────────────────────────────────
+let renderer, scene, camera, clock;
+let portalMeshes = [], portalRings = [];
+let canMove = false;
+const keys = {};
+
+function initMain(){
+  const canvas = document.getElementById('c');
+  renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.setSize(window.innerWidth,window.innerHeight);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.fog = new THREE.Fog(0x87ceeb, 20, 120);
+
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x87ceeb);
+
+  camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 200);
+  camera.position.set(0, 1.7, 18);
+
+  clock = new THREE.Clock();
+
+  buildWorld();
+  buildPortals();
+  setupLights();
+  setupControls();
+  window.addEventListener('resize', onResize);
+  animate();
+}
+
+function buildWorld(){
+  // Ground
+  const groundGeo = new THREE.PlaneGeometry(200,200,40,40);
+  const groundMat = new THREE.MeshLambertMaterial({color:0x4a9e3f});
+  const ground = new THREE.Mesh(groundGeo, groundMat);
+  ground.rotation.x = -Math.PI/2;
+  ground.receiveShadow = true;
+  scene.add(ground);
+
+  // Path crosses
+  addPath(0,0,200,4,0); // Z path
+  addPath(0,0,4,200,0); // X path
+
+  // Secondary paths to portals
+  addPath(-12,0,4,20,Math.PI/2);
+  addPath(12,0,4,20,Math.PI/2);
+
+  // Grass patches/variation
+  for(let i=0;i<60;i++){
+    const x=(Math.random()-0.5)*80, z=(Math.random()-0.5)*80;
+    if(Math.abs(x)<3||Math.abs(z)<3) continue;
+    addBush(x,z);
+  }
+
+  // Trees
+  const treePositions=[[-25,30],[25,30],[-25,-30],[25,-30],[-35,5],[35,5],[5,40],[-5,40],[10,-35],[-10,-35],[-20,15],[20,15],[-18,-15],[18,-15]];
+  treePositions.forEach(([x,z])=>addTree(x,z));
+
+  // Central plaza
+  const plazaGeo = new THREE.CylinderGeometry(6,6,0.05,32);
+  const plazaMat = new THREE.MeshLambertMaterial({color:0xccaa77});
+  const plaza = new THREE.Mesh(plazaGeo,plazaMat);
+  plaza.position.set(0,0.01,0);
+  scene.add(plaza);
+
+  // Welcome sign in center — shows the active world's name
+  const worldName = activePortalSet ? (window._activeWorldName||'MY WORLD') : "SAAHAN'S WORLD";
+  addSign(0,-9, worldName,'#FFD700','Walk into a glowing portal to explore each project');
+
+  // Descriptive sign in front of each portal
+  const SIGN_DESC = {
+    qc:  'Educational battle game with test prep',
+    str: 'AI property report tool for InsimProperties',
+    ref: 'Client referral program with rewards',
+    ec:  'AI event management platform on Vercel',
+    about: 'The story of the 12-year-old who built all this',
+    myslides: 'Build your own slideshow with a PowerPoint editor'
+  };
+  getPortals().forEach(p=>{
+    const sz = p.pos.z + (p.angle===0 ? 3.6 : -3.6);
+    addSign(p.pos.x, sz, p.label, p.colorHex, SIGN_DESC[p.id]||p.subtitle||'', p.angle);
+  });
+}
+
+function addPath(cx,cz,w,l,ry){
+  const geo=new THREE.BoxGeometry(w,0.05,l);
+  const mat=new THREE.MeshLambertMaterial({color:0xc4a267});
+  const m=new THREE.Mesh(geo,mat);
+  m.position.set(cx,0.02,cz);
+  m.rotation.y=ry;
+  scene.add(m);
+}
+
+function addTree(x,z){
+  // trunk
+  const tGeo=new THREE.CylinderGeometry(0.2,0.3,2.5,8);
+  const tMat=new THREE.MeshLambertMaterial({color:0x6B3A2A});
+  const trunk=new THREE.Mesh(tGeo,tMat);
+  trunk.position.set(x,1.25,z);
+  trunk.castShadow=true;
+  scene.add(trunk);
+  // canopy layers
+  [[0,3,2.2],[0,4.2,1.6],[0,5.2,1.1]].forEach(([dy,py,r])=>{
+    const cGeo=new THREE.ConeGeometry(r,1.6,8);
+    const cMat=new THREE.MeshLambertMaterial({color:0x2d6a4f});
+    const cone=new THREE.Mesh(cGeo,cMat);
+    cone.position.set(x,py,z);
+    cone.castShadow=true;
+    scene.add(cone);
+  });
+}
+
+function addBush(x,z){
+  const r=0.3+Math.random()*0.4;
+  const geo=new THREE.SphereGeometry(r,6,6);
+  const mat=new THREE.MeshLambertMaterial({color:0x3a7a30});
+  const m=new THREE.Mesh(geo,mat);
+  m.position.set(x,r*0.6,z);
+  scene.add(m);
+}
+
+function makeTextTexture(title, subtitle, accent){
+  const cv=document.createElement('canvas');
+  cv.width=512; cv.height=256;
+  const g=cv.getContext('2d');
+  // board background
+  g.fillStyle='#1a1a2e';
+  g.fillRect(0,0,512,256);
+  g.strokeStyle=accent; g.lineWidth=10;
+  g.strokeRect(6,6,500,244);
+  // accent bar
+  g.fillStyle=accent;
+  g.fillRect(0,0,512,14);
+  g.fillRect(0,242,512,14);
+  // title
+  g.fillStyle='#ffffff';
+  g.textAlign='center';
+  g.font='bold 46px Segoe UI, sans-serif';
+  g.fillText(title, 256, subtitle?100:140, 470);
+  // subtitle
+  if(subtitle){
+    g.fillStyle=accent;
+    g.font='26px Segoe UI, sans-serif';
+    // wrap subtitle
+    const words=subtitle.split(' ');
+    let line='', y=150, lines=[];
+    words.forEach(w=>{
+      if(g.measureText(line+w).width>440){ lines.push(line); line=w+' '; }
+      else line+=w+' ';
+    });
+    lines.push(line);
+    lines.slice(0,3).forEach((ln,i)=>g.fillText(ln.trim(), 256, y+i*32, 470));
+  }
+  const tex=new THREE.CanvasTexture(cv);
+  tex.anisotropy=4;
+  return tex;
+}
+
+function addSign(x,z,title,color,subtitle,rotY){
+  // post
+  const pGeo=new THREE.CylinderGeometry(0.06,0.06,1.6,8);
+  const pMat=new THREE.MeshLambertMaterial({color:0x6B5335});
+  const post=new THREE.Mesh(pGeo,pMat);
+  post.position.set(x,0.8,z);
+  post.rotation.y=rotY||0;
+  scene.add(post);
+  // board with text texture
+  const tex=makeTextTexture(title, subtitle||'', color);
+  const bGeo=new THREE.BoxGeometry(3.6,1.8,0.12);
+  const faceMat=new THREE.MeshBasicMaterial({map:tex});
+  const sideMat=new THREE.MeshLambertMaterial({color:0x0f0f1e});
+  const board=new THREE.Mesh(bGeo,[sideMat,sideMat,sideMat,sideMat,faceMat,faceMat]);
+  board.position.set(x,2.2,z);
+  board.rotation.y=rotY||0;
+  scene.add(board);
+}
+
+function buildPortals(){
+  getPortals().forEach((p,i)=>{
+    const group = new THREE.Group();
+    group.position.set(p.pos.x, 0, p.pos.z);
+    group.rotation.y = p.angle;
+
+    // Ground pad
+    const padGeo = new THREE.CylinderGeometry(2.5,2.5,0.1,32);
+    const padMat = new THREE.MeshLambertMaterial({color: new THREE.Color(p.colorHex).multiplyScalar(0.4)});
+    const pad = new THREE.Mesh(padGeo, padMat);
+    pad.position.y = 0.05;
+    group.add(pad);
+
+    // Portal frame (torus)
+    const torusGeo = new THREE.TorusGeometry(1.6,0.12,16,64);
+    const torusMat = new THREE.MeshStandardMaterial({
+      color: p.color, emissive: p.color, emissiveIntensity:0.8, metalness:0.5, roughness:0.2
+    });
+    const torus = new THREE.Mesh(torusGeo, torusMat);
+    torus.position.y = 2.2;
+    group.add(torus);
+    portalRings.push({mesh:torus, baseEmissive:0.8});
+
+    // Portal surface (glowing disk)
+    const diskGeo = new THREE.CircleGeometry(1.55,64);
+    const diskMat = new THREE.MeshBasicMaterial({
+      color: new THREE.Color(p.colorHex),
+      transparent:true, opacity:0.55, side:THREE.DoubleSide
+    });
+    const disk = new THREE.Mesh(diskGeo, diskMat);
+    disk.position.y = 2.2;
+    group.add(disk);
+
+    // Inner swirl particles
+    const partGeo = new THREE.BufferGeometry();
+    const pts = [];
+    for(let j=0;j<80;j++){
+      const a=Math.random()*Math.PI*2, r=Math.random()*1.4;
+      pts.push(Math.cos(a)*r, (Math.random()-0.5)*0.1, Math.sin(a)*r);
+    }
+    partGeo.setAttribute('position', new THREE.Float32BufferAttribute(pts,3));
+    const partMat = new THREE.PointsMaterial({color:p.color, size:0.06, transparent:true, opacity:0.9});
+    const parts = new THREE.Points(partGeo, partMat);
+    parts.position.y = 2.2;
+    group.add(parts);
+
+    // Pillars
+    [-1.65,1.65].forEach(ox=>{
+      const pGeo=new THREE.CylinderGeometry(0.12,0.14,2.2,12);
+      const pMat=new THREE.MeshStandardMaterial({color:0xcccccc,metalness:0.7,roughness:0.3});
+      const pillar=new THREE.Mesh(pGeo,pMat);
+      pillar.position.set(ox,1.1,0);
+      group.add(pillar);
+    });
+
+    // Point light for glow
+    const light=new THREE.PointLight(p.color, 1.5, 8);
+    light.position.set(0,2.2,0.3);
+    group.add(light);
+
+    scene.add(group);
+    portalMeshes.push({group, data:p, disk, parts, light});
+  });
+}
+
+function setupLights(){
+  const ambient=new THREE.AmbientLight(0xffffff,0.5);
+  scene.add(ambient);
+  const sun=new THREE.DirectionalLight(0xfff5cc,1.2);
+  sun.position.set(30,50,20);
+  sun.castShadow=true;
+  sun.shadow.mapSize.width=2048;
+  sun.shadow.mapSize.height=2048;
+  sun.shadow.camera.near=0.5;
+  sun.shadow.camera.far=200;
+  sun.shadow.camera.left=-60;
+  sun.shadow.camera.right=60;
+  sun.shadow.camera.top=60;
+  sun.shadow.camera.bottom=-60;
+  scene.add(sun);
+  const fill=new THREE.DirectionalLight(0xadd8e6,0.3);
+  fill.position.set(-20,10,-10);
+  scene.add(fill);
+}
+
+// ── CONTROLS (drag-to-look, no pointer lock needed) ─────────────
+let yaw=0, pitch=0;
+let lastMX=0, lastMY=0;
+
+function setupControls(){
+  document.addEventListener('keydown',e=>{
+    const t=e.target;
+    if(t && (t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable)) return;
+    if(document.getElementById('studio').classList.contains('open')) return;
+    if(document.getElementById('ss-panel').classList.contains('open')) return;
+    keys[e.code]=true;
+    if(e.code==='KeyF') tryEnterPortal();
+    if(e.code==='KeyE') tryEnterPortal();
+    if(e.code==='Space') doJump();
+    if(e.code==='KeyM'){
+      const ws=document.getElementById('world-select');
+      if(ws.classList.contains('open')) closeWorldSelect(); else openWorldSelect();
+    }
+  });
+  document.addEventListener('keyup',e=>keys[e.code]=false);
+
+  const cv=document.getElementById('c');
+
+  // ── MOUSE LOOK ──────────────────────────────────────────────
+  // Strategy: try real pointer lock (works when file opened directly).
+  // If blocked (iframes), use POINTER CAPTURE — the canvas keeps receiving
+  // move events even when the cursor leaves the window, so looking never stops.
+  let plActive = false;
+  let capturing = false;
+  let downX = 0, downY = 0, moved = 0;
+
+  document.addEventListener('pointerlockchange', ()=>{
+    plActive = document.pointerLockElement === cv;
+    cv.style.cursor = plActive ? 'none' : 'crosshair';
+  });
+
+  function tryLock(){
+    if(!cv.requestPointerLock) return;
+    try {
+      const p = cv.requestPointerLock();
+      if(p && p.catch) p.catch(()=>{});
+    } catch(e){}
+  }
+
+  cv.addEventListener('pointerdown', e=>{
+    if(!canMove) return;
+    downX = e.clientX; downY = e.clientY; moved = 0;
+    if(!plActive){
+      tryLock();                      // works in real browser tab
+      cv.setPointerCapture(e.pointerId);  // fallback: capture keeps events flowing
+      capturing = true;
+    }
+  });
+
+  cv.addEventListener('pointermove', e=>{
+    if(!canMove || plActive) return;
+    if(capturing){
+      yaw   -= e.movementX*0.003;
+      pitch -= e.movementY*0.003;
+      pitch = Math.max(-Math.PI/2.5, Math.min(Math.PI/2.5, pitch));
+      moved += Math.abs(e.movementX)+Math.abs(e.movementY);
+    }
+  });
+
+  // When pointer-locked, movement events arrive on document
+  document.addEventListener('mousemove', e=>{
+    if(!canMove || !plActive) return;
+    yaw   -= e.movementX*0.003;
+    pitch -= e.movementY*0.003;
+    pitch = Math.max(-Math.PI/2.5, Math.min(Math.PI/2.5, pitch));
+  });
+
+  cv.addEventListener('pointerup', e=>{
+    if(capturing){
+      try{ cv.releasePointerCapture(e.pointerId); }catch(err){}
+      capturing = false;
+    }
+    // Small movement = a click → try entering a portal
+    if(moved < 6) tryEnterPortal();
+  });
+
+  cv.addEventListener('pointercancel', ()=>{ capturing=false; });
+
+  // ── TOUCH LOOK (right half of screen drags the camera) ──────────
+  let lookTouchId = null;
+  cv.addEventListener('touchstart',e=>{
+    for(const t of e.changedTouches){
+      // only the right half controls looking (left half is the joystick zone)
+      if(t.clientX > window.innerWidth*0.4 && lookTouchId===null){
+        lookTouchId = t.identifier; lastMX=t.clientX; lastMY=t.clientY;
+      }
+    }
+  },{passive:true});
+  cv.addEventListener('touchmove',e=>{
+    if(!canMove) return;
+    for(const t of e.changedTouches){
+      if(t.identifier===lookTouchId){
+        yaw  -= (t.clientX-lastMX)*0.005;
+        pitch -= (t.clientY-lastMY)*0.005;
+        pitch=Math.max(-Math.PI/2.5, Math.min(Math.PI/2.5, pitch));
+        lastMX=t.clientX; lastMY=t.clientY;
+      }
+    }
+  },{passive:true});
+  const endLook=e=>{ for(const t of e.changedTouches){ if(t.identifier===lookTouchId) lookTouchId=null; } };
+  cv.addEventListener('touchend',endLook,{passive:true});
+  cv.addEventListener('touchcancel',endLook,{passive:true});
+
+  // ── VIRTUAL JOYSTICK (movement) ─────────────────────────────────
+  setupJoystick();
+
+  // ── MOBILE ACTION BUTTONS ───────────────────────────────────────
+  const mEnter=document.getElementById('m-enter');
+  if(mEnter){
+    mEnter.addEventListener('pointerdown',e=>{ e.preventDefault(); tryEnterPortal(); });
+  }
+  const mWorlds=document.getElementById('m-worlds');
+  if(mWorlds){
+    mWorlds.addEventListener('pointerdown',e=>{ e.preventDefault(); openWorldSelect(); });
+  }
+  const mJump=document.getElementById('m-jump');
+  if(mJump){
+    mJump.addEventListener('pointerdown',e=>{ e.preventDefault(); doJump(); });
+  }
+  const mSprint=document.getElementById('m-sprint');
+  if(mSprint){
+    mSprint.addEventListener('pointerdown',e=>{ e.preventDefault(); sprintHeld=true; mSprint.classList.add('on'); });
+    const stop=e=>{ sprintHeld=false; mSprint.classList.remove('on'); };
+    mSprint.addEventListener('pointerup',stop);
+    mSprint.addEventListener('pointercancel',stop);
+    mSprint.addEventListener('pointerleave',stop);
+  }
+
+  canMove=true;
+}
+
+// Joystick: drives joyX/joyY (-1..1) which the animate loop reads
+let joyX=0, joyY=0;
+let sprintHeld=false, jumpVel=0;
+function doJump(){ if(canMove && camera && camera.position.y<=1.71) jumpVel=8; }
+function setupJoystick(){
+  const zone=document.getElementById('joystick-zone');
+  const stick=document.getElementById('joystick-stick');
+  if(!zone||!stick) return;
+  let active=false, cx=0, cy=0, radius=52, jid=null;
+
+  function start(e){
+    const t=e.changedTouches?e.changedTouches[0]:e;
+    const r=zone.getBoundingClientRect();
+    cx=r.left+r.width/2; cy=r.top+r.height/2;
+    active=true; jid=t.identifier!==undefined?t.identifier:'mouse';
+    move(e);
+  }
+  function move(e){
+    if(!active) return;
+    let t;
+    if(e.changedTouches){ for(const ct of e.changedTouches){ if(ct.identifier===jid){ t=ct; break; } } if(!t) return; }
+    else t=e;
+    let dx=t.clientX-cx, dy=t.clientY-cy;
+    const dist=Math.hypot(dx,dy);
+    if(dist>radius){ dx=dx/dist*radius; dy=dy/dist*radius; }
+    stick.style.transform=`translate(${dx}px,${dy}px)`;
+    joyX=dx/radius; joyY=dy/radius;
+  }
+  function end(e){
+    if(e.changedTouches){ let found=false; for(const ct of e.changedTouches){ if(ct.identifier===jid) found=true; } if(!found) return; }
+    active=false; jid=null; joyX=0; joyY=0;
+    stick.style.transform='translate(0,0)';
+  }
+  zone.addEventListener('touchstart',e=>{e.preventDefault();start(e);},{passive:false});
+  zone.addEventListener('touchmove',e=>{e.preventDefault();move(e);},{passive:false});
+  zone.addEventListener('touchend',end,{passive:true});
+  zone.addEventListener('touchcancel',end,{passive:true});
+  // also allow mouse for testing on desktop
+  zone.addEventListener('mousedown',start);
+  window.addEventListener('mousemove',e=>{ if(active) move(e); });
+  window.addEventListener('mouseup',e=>{ if(active){ active=false; joyX=0; joyY=0; stick.style.transform='translate(0,0)'; } });
+}
+
+function onResize(){
+  camera.aspect=window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth,window.innerHeight);
+  centerCrosshair();
+}
+function centerCrosshair(){
+  const cv=document.getElementById('c');
+  if(!cv) return;
+  const r=cv.getBoundingClientRect();
+  const xh=document.getElementById('crosshair');
+  xh.style.left=(r.left+r.width/2-10)+'px';
+  xh.style.top =(r.top +r.height/2-10)+'px';
+}
+function showCrosshair(){ centerCrosshair(); document.getElementById('crosshair').style.display='block'; }
+function hideCrosshair(){ document.getElementById('crosshair').style.display='none'; }
+
+function getNearPortal(){
+  const pos=camera.position;
+  return getPortals().find(p=>{
+    const dx=p.pos.x-pos.x, dz=p.pos.z-pos.z;
+    return Math.sqrt(dx*dx+dz*dz)<3.5;
+  })||null;
+}
+
+function tryEnterPortal(){
+  const p=getNearPortal();
+  if(p) enterDimension(p);
+}
+
+// ── ANIMATE ────────────────────────────────────────────────────
+function animate(){
+  requestAnimationFrame(animate);
+  const dt=clock.getDelta();
+  const t=clock.getElapsedTime();
+
+  if(canMove){
+    const dir=new THREE.Vector3();
+    if(keys['KeyW']||keys['ArrowUp']) dir.z=-1;
+    if(keys['KeyS']||keys['ArrowDown']) dir.z=1;
+    if(keys['KeyA']||keys['ArrowLeft']) dir.x=-1;
+    if(keys['KeyD']||keys['ArrowRight']) dir.x=1;
+    if(Math.abs(joyX)>0.12 || Math.abs(joyY)>0.12){ dir.x += joyX; dir.z += joyY; }
+    const sprinting = keys['ShiftLeft']||keys['ShiftRight']||sprintHeld;
+    const speed = sprinting ? 11 : 6;
+    if(dir.lengthSq()>0){
+      dir.normalize().multiplyScalar(speed*dt);
+      dir.applyEuler(new THREE.Euler(0,yaw,0));
+      camera.position.add(dir);
+    }
+    // Jump physics
+    if(jumpVel!==0 || camera.position.y>1.7){
+      camera.position.y += jumpVel*dt;
+      jumpVel -= 22*dt;
+      if(camera.position.y<=1.7){ camera.position.y=1.7; jumpVel=0; }
+    } else {
+      camera.position.y=1.7;
+    }
+    camera.position.x=Math.max(-60,Math.min(60,camera.position.x));
+    camera.position.z=Math.max(-60,Math.min(60,camera.position.z));
+  }
+
+  // Apply rotation
+  camera.rotation.order='YXZ';
+  camera.rotation.y=yaw;
+  camera.rotation.x=pitch;
+
+  // Animate portals
+  portalMeshes.forEach((pm,i)=>{
+    pm.disk.rotation.z = t*0.6;
+    pm.parts.rotation.y = t*0.4*(i%2===0?1:-1);
+    pm.disk.material.opacity = 0.45+Math.sin(t*2+i)*0.15;
+    pm.light.intensity = 1.2+Math.sin(t*3+i)*0.5;
+  });
+  portalRings.forEach((r,i)=>{
+    r.mesh.material.emissiveIntensity = r.baseEmissive+Math.sin(t*2+i)*0.3;
+  });
+
+  // Portal hint
+  const near=getNearPortal();
+  document.getElementById('portal-hint').style.display=near?'block':'none';
+  const mEnterBtn=document.getElementById('m-enter');
+  if(mEnterBtn) mEnterBtn.classList.toggle('hidden', !near);
+  document.getElementById('hud-area').textContent = near ? ('Near: '+near.label+' Portal') : (window._activeWorldName ? 'Exploring '+titleCase(window._activeWorldName) : 'Exploring Saahan\'s Projects');
+
+  renderer.render(scene,camera);
+}
+
+// ── SLIDESHOW SYSTEM ─────────────────────────────────────────────
+let ssSlides=[], ssIdx=0;
+
+const PROJECT_SLIDES = {
+  qc:[
+    {
+      bg:'#0a0a1a', accent:'#F59E0B',
+      render: ac=>`
+        <div class="sl-eyebrow" style="color:${ac}">Project 1 of 4 · Educational Game</div>
+        <div class="sl-h1">⚡ Question Clash</div>
+        <div class="sl-divider" style="background:${ac}"></div>
+        <div class="sl-sub">An educational battle game where answering questions earns power — and power wins fights. Built entirely by Saahan Chadha from scratch.</div>
+        <div class="sl-grid cols3">
+          <div class="sl-card"><h4 style="color:${ac}">🎓 Purpose</h4><p>Make studying feel like a game. Students answer real curriculum questions to earn energy for battle turns.</p></div>
+          <div class="sl-card"><h4 style="color:${ac}">🧪 Mini-game</h4><p>A scientist upgrades scrap materials into weapons and gear between rounds — gamified progression loop.</p></div>
+          <div class="sl-card"><h4 style="color:${ac}">📚 Test Prep</h4><p>Dedicated modes for CogAT and Issaquah School District Path D standardised tests.</p></div>
+        </div>
+        <div><span class="sl-badge" style="color:${ac};border-color:${ac};background:${ac}18">HTML/JS</span><span class="sl-badge" style="color:${ac};border-color:${ac};background:${ac}18">Three.js</span><span class="sl-badge" style="color:#ef4444;border-color:#ef4444;background:#ef444418">PvP Engine</span><span class="sl-badge" style="color:#22c55e;border-color:#22c55e;background:#22c55e18">Dual Currency</span><span class="sl-badge" style="color:#3b82f6;border-color:#3b82f6;background:#3b82f618">EdTech</span></div>`
+    },
+    {
+      bg:'#0a0a1a', accent:'#F59E0B',
+      render: ac=>`
+        <div class="sl-eyebrow" style="color:${ac}">How it was built · Core loop</div>
+        <div class="sl-h1" style="font-size:36px">The Game Loop</div>
+        <div class="sl-divider" style="background:${ac}"></div>
+        <div class="sl-flow">
+          <div class="sl-flow-step">Answer question</div><div class="sl-flow-arrow">→</div>
+          <div class="sl-flow-step">Earn Energy Points</div><div class="sl-flow-arrow">→</div>
+          <div class="sl-flow-step">Spend on battle turn</div><div class="sl-flow-arrow">→</div>
+          <div class="sl-flow-step">Win Silver / Clash Cash</div><div class="sl-flow-arrow">→</div>
+          <div class="sl-flow-step">Buy upgrades</div>
+        </div>
+        <div class="sl-code"><span class="cm">// Energy system — questions fuel battle turns</span>
+<span class="ck">function</span> <span class="cs">answerQuestion</span>(correct) {
+  <span class="ck">if</span> (correct) {
+    player.energyPoints += <span class="cn">10</span>;
+    player.silver += <span class="cn">5</span>;
+    <span class="cs">checkChallengeBonus</span>(); <span class="cm">// 50 Clash Cash if challenge Q</span>
+  }
+  <span class="cs">updateHUD</span>();
+}
+
+<span class="ck">function</span> <span class="cs">spendEnergyForTurn</span>() {
+  <span class="ck">if</span> (player.energyPoints >= <span class="cn">20</span>) {
+    player.energyPoints -= <span class="cn">20</span>;
+    <span class="cs">startBattleTurn</span>();
+  }
+}</div>
+        <div class="sl-sub" style="font-size:13px">Questions gate the mini-game. Wrong answers don't punish — they just don't reward. This keeps the game stress-free for learners.</div>`
+    },
+    {
+      bg:'#0a0a1a', accent:'#F59E0B',
+      render: ac=>`
+        <div class="sl-eyebrow" style="color:${ac}">How it was built · Currency & Economy</div>
+        <div class="sl-h1" style="font-size:36px">Dual Currency System</div>
+        <div class="sl-divider" style="background:${ac}"></div>
+        <div class="sl-grid cols2">
+          <div class="sl-card" style="border-color:rgba(192,192,192,.3)">
+            <h4 style="color:#C0C0C0">🪙 Silver — Common currency</h4>
+            <ul><li>Earned from every correct answer</li><li>Used to buy basic upgrades and materials</li><li>Easy to earn, encourages daily play</li><li>Resets can be earned back quickly</li></ul>
+          </div>
+          <div class="sl-card" style="border-color:rgba(255,215,0,.3)">
+            <h4 style="color:#FFD700">💎 Clash Cash — Premium currency</h4>
+            <ul><li>Only awarded on Challenge Questions</li><li>50 Clash Cash per challenge correct</li><li>Used for rare gear and cosmetics</li><li>Cannot be bought — skill-gated only</li></ul>
+          </div>
+        </div>
+        <div class="sl-code"><span class="cm">// Challenge question — 50 Clash Cash reward</span>
+<span class="ck">function</span> <span class="cs">checkChallengeBonus</span>() {
+  <span class="ck">if</span> (currentQuestion.isChallenge) {
+    player.clashCash += <span class="cn">50</span>;
+    <span class="cs">showCelebration</span>(<span class="cs">"⚡ CHALLENGE COMPLETE!"</span>);
+  }
+}</div>`
+    },
+    {
+      bg:'#0a0a1a', accent:'#F59E0B',
+      render: ac=>`
+        <div class="sl-eyebrow" style="color:${ac}">How it was built · PvP Arena</div>
+        <div class="sl-h1" style="font-size:36px">PvP Matchmaking Arena</div>
+        <div class="sl-divider" style="background:${ac}"></div>
+        <div class="sl-sub">Built a real-time PvP system where two players answer in parallel. The faster, more accurate player wins the round and earns bonus Clash Cash.</div>
+        <div class="sl-grid cols2">
+          <div class="sl-card"><h4 style="color:${ac}">⚔️ Battle mechanics</h4><ul><li>Real-time question timer per round</li><li>Energy spent before each turn</li><li>Attack / Defend choices</li><li>Health bar depletes on wrong answer</li></ul></div>
+          <div class="sl-card"><h4 style="color:${ac}">🏆 Matchmaking</h4><ul><li>Join lobby with unique room code</li><li>Wait screen while opponent connects</li><li>Grade-matched question pools</li><li>Post-match reward breakdown</li></ul></div>
+        </div>
+        <div class="sl-code"><span class="cm">// Host PvP session with shared room code</span>
+<span class="ck">const</span> roomCode = <span class="cs">generateCode</span>(<span class="cn">6</span>);
+socket.<span class="cs">emit</span>(<span class="cs">'host'</span>, { roomCode, grade: player.grade });
+socket.<span class="cs">on</span>(<span class="cs">'opponentJoined'</span>, () => {
+  <span class="cs">startCountdown</span>(<span class="cn">3</span>); <span class="cs">loadQuestion</span>();
+});</div>`
+    },
+    {
+      bg:'#0a0a1a', accent:'#F59E0B',
+      render: ac=>`
+        <div class="sl-eyebrow" style="color:${ac}">Final result · Features</div>
+        <div class="sl-h1" style="font-size:36px">What Question Clash Does</div>
+        <div class="sl-divider" style="background:${ac}"></div>
+        <div class="sl-feat"><div class="sl-feat-icon">📐</div><div class="sl-feat-text"><h5>All grade levels</h5><p>Question banks cover K–12 curriculum across Maths, Science, English, and History.</p></div></div>
+        <div class="sl-feat"><div class="sl-feat-icon">🧬</div><div class="sl-feat-text"><h5>CogAT test prep mode</h5><p>Dedicated section with verbal, quantitative, and nonverbal reasoning questions matching the real CogAT format.</p></div></div>
+        <div class="sl-feat"><div class="sl-feat-icon">🎓</div><div class="sl-feat-text"><h5>Issaquah Path D prep</h5><p>Tailored question set aligned to Issaquah School District's gifted program assessment criteria.</p></div></div>
+        <div class="sl-feat"><div class="sl-feat-icon">🔬</div><div class="sl-feat-text"><h5>Scientist upgrade workshop</h5><p>Between battles, craft and upgrade gear from scrap materials you earn — RPG-style progression inside an edu game.</p></div></div>
+        <div class="sl-feat"><div class="sl-feat-icon">⚡</div><div class="sl-feat-text"><h5>Challenge question events</h5><p>Random hard questions appear mid-session — answer correctly for 50 Clash Cash, the rarest reward in the game.</p></div></div>`
+    }
+  ],
+
+  str:[
+    {
+      bg:'#0a1208', accent:'#22C55E',
+      render: ac=>`
+        <div class="sl-eyebrow" style="color:${ac}">Project 2 of 4 · PropTech / AI</div>
+        <div class="sl-h1">🏠 STR Score Report</div>
+        <div class="sl-divider" style="background:${ac}"></div>
+        <div class="sl-sub">An AI-powered tool embedded in InsimProperties that analyses any property address and delivers a full Short-Term Rental score PDF to the client's inbox — instantly, automatically, zero manual steps.</div>
+        <div class="sl-grid cols3">
+          <div class="sl-card"><h4 style="color:${ac}">🤖 AI Analysis</h4><p>ChatGPT agent processes the address, rental market data, and local regulations to generate a full STR viability score.</p></div>
+          <div class="sl-card"><h4 style="color:${ac}">📄 PDF Report</h4><p>Full branded PDF generated automatically — includes score, breakdown, comparable rentals, and recommendations.</p></div>
+          <div class="sl-card"><h4 style="color:${ac}">📧 Auto-delivery</h4><p>PDF hits the client's inbox the moment they submit the form. No waiting, no manual sending.</p></div>
+        </div>`
+    },
+    {
+      bg:'#0a1208', accent:'#22C55E',
+      render: ac=>`
+        <div class="sl-eyebrow" style="color:${ac}">How it was built · Architecture</div>
+        <div class="sl-h1" style="font-size:36px">How the Pipeline Works</div>
+        <div class="sl-divider" style="background:${ac}"></div>
+        <div class="sl-flow">
+          <div class="sl-flow-step">Client fills form</div><div class="sl-flow-arrow">→</div>
+          <div class="sl-flow-step">InsimProperties website</div><div class="sl-flow-arrow">→</div>
+          <div class="sl-flow-step">Render backend server</div><div class="sl-flow-arrow">→</div>
+          <div class="sl-flow-step">OpenAI API call</div><div class="sl-flow-arrow">→</div>
+          <div class="sl-flow-step">PDF generated</div><div class="sl-flow-arrow">→</div>
+          <div class="sl-flow-step">Resend → client inbox</div>
+        </div>
+        <div class="sl-code"><span class="cm">// Backend route — receives form, triggers AI + PDF + email</span>
+app.<span class="cs">post</span>(<span class="cs">'/str-report'</span>, <span class="ck">async</span> (req, res) => {
+  <span class="ck">const</span> { address, email } = req.body;
+  <span class="ck">const</span> report = <span class="ck">await</span> <span class="cs">callOpenAI</span>(address);
+  <span class="ck">const</span> pdf = <span class="ck">await</span> <span class="cs">generatePDF</span>(report);
+  <span class="ck">await</span> <span class="cs">sendEmail</span>({ to: email, attachment: pdf });
+  res.<span class="cs">json</span>({ success: <span class="ck">true</span> });
+});</div>
+        <div class="sl-sub" style="font-size:13px">The backend runs on Render — a cloud hosting platform — so it's always live and doesn't need Saahan's computer to be on.</div>`
+    },
+    {
+      bg:'#0a1208', accent:'#22C55E',
+      render: ac=>`
+        <div class="sl-eyebrow" style="color:${ac}">How it was built · Email delivery</div>
+        <div class="sl-h1" style="font-size:36px">Getting Emails to Actually Land</div>
+        <div class="sl-divider" style="background:${ac}"></div>
+        <div class="sl-sub">Email delivery sounds simple — it isn't. Getting emails to land in the inbox (not spam) required setting up three DNS records on GoDaddy:</div>
+        <div class="sl-grid cols3">
+          <div class="sl-card"><h4 style="color:${ac}">📋 SPF Record</h4><p>Tells email servers "Resend is allowed to send on behalf of insimproperties.com". Prevents spoofing flags.</p></div>
+          <div class="sl-card"><h4 style="color:${ac}">🔑 DKIM Record</h4><p>Cryptographic signature that proves the email genuinely came from Insim — not a spammer faking the address.</p></div>
+          <div class="sl-card"><h4 style="color:${ac}">✅ Domain verify</h4><p>A TXT record that proves Saahan owns the domain and authorises Resend to send from it.</p></div>
+        </div>
+        <div class="sl-code"><span class="cm">// GoDaddy DNS — three records added</span>
+TXT  @          <span class="cs">"v=spf1 include:amazonses.com ~all"</span>
+TXT  _resend    <span class="cs">"resend-domain-verification=abc123..."</span>
+TXT  resend._dk <span class="cs">"p=MIGfMA0GCSqGSIb3DQEBAQUA..."</span></div>`
+    },
+    {
+      bg:'#0a1208', accent:'#22C55E',
+      render: ac=>`
+        <div class="sl-eyebrow" style="color:${ac}">Final result · Features</div>
+        <div class="sl-h1" style="font-size:36px">What STR Score Does</div>
+        <div class="sl-divider" style="background:${ac}"></div>
+        <div class="sl-feat"><div class="sl-feat-icon">🏡</div><div class="sl-feat-text"><h5>Any address → instant analysis</h5><p>Client enters a property address in the InsimProperties form. The AI analyses rental potential, local competition, and regulations.</p></div></div>
+        <div class="sl-feat"><div class="sl-feat-icon">📊</div><div class="sl-feat-text"><h5>Full PDF report generated</h5><p>Branded, multi-page PDF with STR score out of 100, breakdown by category, comparable rentals nearby, and actionable recommendations.</p></div></div>
+        <div class="sl-feat"><div class="sl-feat-icon">📬</div><div class="sl-feat-text"><h5>Email delivered in seconds</h5><p>PDF attached and sent via Resend to the client's email the moment the form is submitted. No delays, no manual steps.</p></div></div>
+        <div class="sl-feat"><div class="sl-feat-icon">🔒</div><div class="sl-feat-text"><h5>Live on InsimProperties</h5><p>Fully integrated into the existing website at insimproperties.com — the "Get My Preliminary STR Report" form triggers the whole pipeline.</p></div></div>`
+    }
+  ],
+
+  ref:[
+    {
+      bg:'#020818', accent:'#3B82F6',
+      render: ac=>`
+        <div class="sl-eyebrow" style="color:${ac}">Project 3 of 4 · Growth / PropTech</div>
+        <div class="sl-h1">🔗 Insim Referral Program</div>
+        <div class="sl-divider" style="background:${ac}"></div>
+        <div class="sl-sub">A full client referral system for InsimProperties. Clients get a unique link, share it with people they know, and earn rewards automatically as those referrals convert.</div>
+        <div class="sl-grid cols3">
+          <div class="sl-card"><h4 style="color:${ac}">🔗 Unique links</h4><p>Every client gets a personal referral code and shareable link that tracks their referrals uniquely.</p></div>
+          <div class="sl-card"><h4 style="color:${ac}">📊 Ledger dashboard</h4><p>Clients see who they referred, which converted, and their pending and paid rewards in real time.</p></div>
+          <div class="sl-card"><h4 style="color:${ac}">🏆 Reward system</h4><p>Rewards automatically calculated and logged when a referred client completes a qualifying action.</p></div>
+        </div>`
+    },
+    {
+      bg:'#020818', accent:'#3B82F6',
+      render: ac=>`
+        <div class="sl-eyebrow" style="color:${ac}">How it was built · Database</div>
+        <div class="sl-h1" style="font-size:36px">Google Sheets as a Database</div>
+        <div class="sl-divider" style="background:${ac}"></div>
+        <div class="sl-sub">Rather than setting up a traditional database, Saahan used Google Sheets as the backend — connected via Google Apps Script as an API layer. Fast to build, easy for Insim to manage directly.</div>
+        <div class="sl-code"><span class="cm">// Apps Script — insert a new referral row</span>
+<span class="ck">function</span> <span class="cs">insertReferral</span>(data) {
+  <span class="ck">const</span> sheet = SpreadsheetApp
+    .<span class="cs">getActive</span>().<span class="cs">getSheetByName</span>(<span class="cs">'Referrals'</span>);
+  sheet.<span class="cs">appendRow</span>([
+    data.referrerId, data.referredEmail,
+    data.status, <span class="ck">new</span> <span class="cs">Date</span>().<span class="cs">toISOString</span>()
+  ]);
+}</div>
+        <div class="sl-grid cols2">
+          <div class="sl-card"><h4 style="color:${ac}">Sheets used</h4><ul><li>Clients — referrer registry</li><li>Referrals — each referral tracked</li><li>Rewards — payout ledger</li><li>Requests — inbound form data</li></ul></div>
+          <div class="sl-card"><h4 style="color:${ac}">What was debugged</h4><ul><li>Multi-sheet deployment conflicts</li><li>Missing header rows causing crashes</li><li>Stale deployment URLs serving old code</li><li>Sheet11/10/9 ghost sheets created by bugs</li></ul></div>
+        </div>`
+    },
+    {
+      bg:'#020818', accent:'#3B82F6',
+      render: ac=>`
+        <div class="sl-eyebrow" style="color:${ac}">How it was built · Referral codes</div>
+        <div class="sl-h1" style="font-size:36px">Unique Code Generation</div>
+        <div class="sl-divider" style="background:${ac}"></div>
+        <div class="sl-code"><span class="cm">// Generate a unique 8-char referral code per client</span>
+<span class="ck">function</span> <span class="cs">generateCode</span>(clientId) {
+  <span class="ck">const</span> chars = <span class="cs">'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'</span>;
+  <span class="ck">let</span> code = <span class="cs">''</span>;
+  <span class="ck">for</span> (<span class="ck">let</span> i = <span class="cn">0</span>; i < <span class="cn">8</span>; i++) {
+    code += chars[Math.<span class="cs">floor</span>(Math.<span class="cs">random</span>() * chars.length)];
+  }
+  <span class="ck">return</span> <span class="cs">\`INSIM-\${code}\`</span>;
+}
+<span class="cm">// Shareable URL</span>
+<span class="ck">const</span> link = <span class="cs">\`https://insimproperties.com/ref?code=\${code}\`</span>;</div>
+        <div class="sl-sub" style="font-size:13px">Codes are stored against the client in the Clients sheet. When someone visits a referral link, the code is looked up and the referral is logged to the Referrals sheet against that client ID.</div>`
+    },
+    {
+      bg:'#020818', accent:'#3B82F6',
+      render: ac=>`
+        <div class="sl-eyebrow" style="color:${ac}">Security note</div>
+        <div class="sl-h1" style="font-size:32px">Admin Panel</div>
+        <div class="sl-divider" style="background:${ac}"></div>
+        <div class="sl-security">
+          <div class="sl-security-icon">🔒</div>
+          <p>The referral program includes a password-protected <strong>admin panel</strong> where Insim staff can view all referrals, mark rewards as paid, export data, and manage client accounts. This panel is intentionally not shown here for security and privacy reasons — it contains real client data and business-sensitive information.</p>
+        </div>
+        <div style="margin-top:24px;">
+          <div class="sl-feat"><div class="sl-feat-icon">📋</div><div class="sl-feat-text"><h5>What the admin panel does</h5><p>View all referrals across all clients, approve or reject conversions, mark rewards as paid, and download full CSV exports.</p></div></div>
+          <div class="sl-feat"><div class="sl-feat-icon">🔐</div><div class="sl-feat-text"><h5>Why it's hidden</h5><p>It contains names, emails, and financial reward data for real InsimProperties clients. Showing it publicly would be a privacy violation.</p></div></div>
+        </div>`
+    },
+    {
+      bg:'#020818', accent:'#3B82F6',
+      render: ac=>`
+        <div class="sl-eyebrow" style="color:${ac}">Final result · Features</div>
+        <div class="sl-h1" style="font-size:36px">What Insim Referral Does</div>
+        <div class="sl-divider" style="background:${ac}"></div>
+        <div class="sl-feat"><div class="sl-feat-icon">🔗</div><div class="sl-feat-text"><h5>Personal referral links</h5><p>Every InsimProperties client gets a unique URL they can share. Any signup through that link is tracked to them automatically.</p></div></div>
+        <div class="sl-feat"><div class="sl-feat-icon">📒</div><div class="sl-feat-text"><h5>Real-time reward ledger</h5><p>Clients log in and see a live ledger — who they referred, which stage each referral is at, and their pending / paid rewards.</p></div></div>
+        <div class="sl-feat"><div class="sl-feat-icon">⚙️</div><div class="sl-feat-text"><h5>Automatic reward calculation</h5><p>When a referred lead qualifies (e.g. completes a consultation), the reward is automatically logged against the referrer's account.</p></div></div>
+        <div class="sl-feat"><div class="sl-feat-icon">🔒</div><div class="sl-feat-text"><h5>Admin panel (secured)</h5><p>Staff-only view to manage all referrals, approve payouts, and export data. Not shown publicly for security — see previous slide.</p></div></div>`
+    }
+  ],
+
+  ec:[
+    {
+      bg:'#120518', accent:'#EC4899',
+      render: ac=>`
+        <div class="sl-eyebrow" style="color:${ac}">Project 4 of 4 · AI / SaaS</div>
+        <div class="sl-h1">📅 EventCommand AI</div>
+        <div class="sl-divider" style="background:${ac}"></div>
+        <div class="sl-sub">A full AI-powered event management platform. Create events, manage attendees, track budgets, coordinate volunteers, handle vendors — all in one dashboard with real accounts and live data.</div>
+        <div class="sl-grid cols3">
+          <div class="sl-card"><h4 style="color:${ac}">🎟️ Events</h4><p>Create and manage multiple events per account. Each event has its own attendees, budget, tasks, and announcements.</p></div>
+          <div class="sl-card"><h4 style="color:${ac}">🤖 AI features</h4><p>AI auto-generates event descriptions, suggests vendor contacts, drafts announcements, and estimates budgets from event type.</p></div>
+          <div class="sl-card"><h4 style="color:${ac}">🔐 Real accounts</h4><p>Full signup/login with Supabase auth. Each user's data is isolated — you only see your own events.</p></div>
+        </div>`
+    },
+    {
+      bg:'#120518', accent:'#EC4899',
+      render: ac=>`
+        <div class="sl-eyebrow" style="color:${ac}">How it was built · Stack</div>
+        <div class="sl-h1" style="font-size:36px">React + Supabase + Vercel</div>
+        <div class="sl-divider" style="background:${ac}"></div>
+        <div class="sl-flow">
+          <div class="sl-flow-step">React frontend</div><div class="sl-flow-arrow">→</div>
+          <div class="sl-flow-step">Supabase auth</div><div class="sl-flow-arrow">→</div>
+          <div class="sl-flow-step">Supabase DB</div><div class="sl-flow-arrow">→</div>
+          <div class="sl-flow-step">Vercel deploy</div>
+        </div>
+        <div class="sl-code"><span class="cm">// Supabase — fetch only THIS user's events</span>
+<span class="ck">const</span> { data } = <span class="ck">await</span> supabase
+  .<span class="cs">from</span>(<span class="cs">'events'</span>)
+  .<span class="cs">select</span>(<span class="cs">'*'</span>)
+  .<span class="cs">eq</span>(<span class="cs">'user_id'</span>, session.user.id)
+  .<span class="cs">order</span>(<span class="cs">'created_at'</span>, { ascending: <span class="ck">false</span> });
+<span class="cm">// Row-level security in Supabase ensures users</span>
+<span class="cm">// literally cannot query other users' rows</span></div>
+        <div class="sl-sub" style="font-size:13px">Supabase Row Level Security (RLS) policies enforce data isolation at the database level — even a malicious API call can't see another user's events.</div>`
+    },
+    {
+      bg:'#120518', accent:'#EC4899',
+      render: ac=>`
+        <div class="sl-eyebrow" style="color:${ac}">How it was built · Deployment</div>
+        <div class="sl-h1" style="font-size:36px">Deploying to Vercel</div>
+        <div class="sl-divider" style="background:${ac}"></div>
+        <div class="sl-sub">EventCommand is live on Vercel — auto-deploys every time Saahan pushes to GitHub. Environment variables keep the Supabase keys secure.</div>
+        <div class="sl-grid cols2">
+          <div class="sl-card"><h4 style="color:${ac}">🔑 Security incident & fix</h4><p>During development, the Supabase anon key was accidentally committed to GitHub. Saahan caught it, rotated the key immediately in Supabase, updated the .env file, and removed it from git history. The old key was dead within minutes.</p></div>
+          <div class="sl-card"><h4 style="color:${ac}">🚀 Deploy workflow</h4><ul><li>Edit code locally</li><li>Test with <code style="color:${ac}">npm run dev</code></li><li>Push to GitHub</li><li>Vercel auto-deploys in ~60 seconds</li><li>Live site updates instantly</li></ul></div>
+        </div>
+        <div class="sl-code"><span class="cm"># .env — never committed to git</span>
+VITE_SUPABASE_URL=https://xyz.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGci...  <span class="cm"># rotated after leak</span></div>`
+    },
+    {
+      bg:'#120518', accent:'#EC4899',
+      render: ac=>`
+        <div class="sl-eyebrow" style="color:${ac}">Final result · Features</div>
+        <div class="sl-h1" style="font-size:36px">What EventCommand Does</div>
+        <div class="sl-divider" style="background:${ac}"></div>
+        <div class="sl-feat"><div class="sl-feat-icon">🎪</div><div class="sl-feat-text"><h5>Full event management</h5><p>Create events with name, date, venue, capacity. Edit or delete them with the three-dot menu. Everything persists in Supabase.</p></div></div>
+        <div class="sl-feat"><div class="sl-feat-icon">👥</div><div class="sl-feat-text"><h5>Attendees, volunteers, vendors</h5><p>Each event tracks its own people — RSVP lists, volunteer shifts, vendor contacts, all in separate tabs per event.</p></div></div>
+        <div class="sl-feat"><div class="sl-feat-icon">💰</div><div class="sl-feat-text"><h5>Budget tracker</h5><p>Line-item budget with income and expense categories. Running total updates live. AI can pre-fill estimates from event type.</p></div></div>
+        <div class="sl-feat"><div class="sl-feat-icon">📢</div><div class="sl-feat-text"><h5>Announcements</h5><p>Post updates visible to anyone with the event link. AI drafts the announcement text — Saahan just edits and publishes.</p></div></div>
+        <div class="sl-feat"><div class="sl-feat-icon">🤖</div><div class="sl-feat-text"><h5>AI features (structured for real API)</h5><p>All AI functions are real code — currently using smart mock logic but structured so a live OpenAI call drops in without touching the UI.</p></div></div>`
+    }
+  ],
+  about:[
+    {
+      bg:'#0a0800', accent:'#FFD700',
+      render: ac=>`
+        <div class="sl-eyebrow" style="color:${ac}">The person behind the projects</div>
+        <div class="sl-h1">👾 Saahan Chadha</div>
+        <div class="sl-divider" style="background:${ac}"></div>
+        <div class="sl-sub">A 12-year-old builder from the USA. Student entrepreneur. Problem-solver. Creator of games, tools, and real AI-powered products — while still in school.</div>
+        <div class="sl-grid cols2">
+          <div class="sl-card"><h4 style="color:${ac}">🧠 What drives him</h4><p>Saahan doesn't just have ideas — he ships them. Question Clash, STR Score, Insim Referral, EventCommand — all real, all live, all built by one person.</p></div>
+          <div class="sl-card"><h4 style="color:${ac}">⚡ One word</h4><p style="font-size:48px;font-weight:900;color:${ac};line-height:1;">Bold.</p><p>That's how Saahan approaches every project. No templates. No hand-holding. Just build.</p></div>
+        </div>`
+    },
+    {
+      bg:'#0a0800', accent:'#FFD700',
+      render: ac=>`
+        <div class="sl-eyebrow" style="color:${ac}">Origin story</div>
+        <div class="sl-h1" style="font-size:38px">How it started</div>
+        <div class="sl-divider" style="background:${ac}"></div>
+        <div class="sl-sub">Saahan is a 12-year-old in the USA who started building real software without waiting to "be old enough." Every project on this world was built from scratch — no templates, no no-code shortcuts.</div>
+        <div class="sl-feat"><div class="sl-feat-icon">🎮</div><div class="sl-feat-text"><h5>Started with games</h5><p>Question Clash was the first big project — proof that learning and fun aren't opposites. Built a full PvP game loop, dual currency, and test prep modes.</p></div></div>
+        <div class="sl-feat"><div class="sl-feat-icon">🏠</div><div class="sl-feat-text"><h5>Then went into real business</h5><p>STR Score brought AI into a real property company — InsimProperties. A live tool that real clients use to get real PDF reports sent to their inbox.</p></div></div>
+        <div class="sl-feat"><div class="sl-feat-icon">🚀</div><div class="sl-feat-text"><h5>Now building platforms</h5><p>EventCommand and the Insim Referral Program are full SaaS-style apps — real auth, real databases, deployed on the internet for real users.</p></div></div>`
+    },
+    {
+      bg:'#0a0800', accent:'#FFD700',
+      render: ac=>`
+        <div class="sl-eyebrow" style="color:${ac}">What makes Saahan different</div>
+        <div class="sl-h1" style="font-size:38px">Student. Entrepreneur. Builder.</div>
+        <div class="sl-divider" style="background:${ac}"></div>
+        <div class="sl-grid cols3">
+          <div class="sl-card" style="border-color:rgba(255,215,0,.25)"><h4 style="color:${ac}">🧪 Curious</h4><p>Saahan doesn't stop at "it works." He explores why it works, breaks it, and rebuilds it better.</p></div>
+          <div class="sl-card" style="border-color:rgba(255,215,0,.25)"><h4 style="color:${ac}">🎨 Creative</h4><p>From hex-grid arenas to 3D first-person worlds, every project has a distinctive point of view.</p></div>
+          <div class="sl-card" style="border-color:rgba(255,215,0,.25)"><h4 style="color:${ac}">💡 Entrepreneurial</h4><p>STR Score and Insim Referral aren't just portfolio pieces — they solve real problems for a real property business.</p></div>
+        </div>
+        <div class="sl-sub" style="font-size:14px;margin-top:8px;">Most proud of: STR Score — real AI, in a real business, built at 12 years old.</div>`
+    },
+    {
+      bg:'#0a0800', accent:'#FFD700',
+      render: ac=>`
+        <div class="sl-eyebrow" style="color:${ac}">The future</div>
+        <div class="sl-h1" style="font-size:38px">What's next</div>
+        <div class="sl-divider" style="background:${ac}"></div>
+        <div class="sl-sub">Saahan's goal is to start his own company. Not eventually — as soon as possible. Every project he builds is practice for that.</div>
+        <div class="sl-feat"><div class="sl-feat-icon">🏢</div><div class="sl-feat-text"><h5>Start a company</h5><p>Saahan wants to be a founder. Not just an employee or a freelancer — the person who builds the thing from nothing and makes it real.</p></div></div>
+        <div class="sl-feat"><div class="sl-feat-icon">🌍</div><div class="sl-feat-text"><h5>Build things that matter</h5><p>Every project so far solves a real problem. That pattern won't stop. The ambition is products that people actually depend on.</p></div></div>
+        <div class="sl-feat"><div class="sl-feat-icon">👾</div><div class="sl-feat-text"><h5>Keep exploring</h5><p>Curious by nature. The next idea might be a game, a SaaS, an AI tool — or something that doesn't have a category yet.</p></div></div>
+        <div style="margin-top:24px;padding:16px;background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.25);border-radius:10px;font-size:14px;color:rgba(255,215,0,.9);text-align:center;font-weight:700;">"Bold." — Saahan Chadha, on how he builds things.</div>`
+    }
+  ]
+
+};
+
+function enterDimension(portalData){
+  hideCrosshair();
+  if(document.exitPointerLock) document.exitPointerLock();
+  if(portalData.id==='myslides'){ openStudio(); return; }
+  canMove=false;
+  currentPortalId = portalData.id;
+  ssSlides = PROJECT_SLIDES[portalData.id] || [];
+  ssIdx = 0;
+
+  const panel = document.getElementById('ss-panel');
+  const nameEl = document.getElementById('ss-project-name');
+  nameEl.textContent = portalData.icon+' '+portalData.label;
+  nameEl.style.color = portalData.colorHex;
+  document.getElementById('ss-progress-fill').style.background = portalData.colorHex;
+  panel.classList.add('open');
+  panel.style.background = '#000';
+
+  renderSlide();
+}
+
+function renderSlide(){
+  if(!ssSlides.length) return;
+  const s = ssSlides[ssIdx];
+  const inner = document.getElementById('ss-slide-inner');
+  inner.innerHTML = s.render(s.accent);
+  document.getElementById('ss-slide').style.background = s.bg+'cc';
+  const pct = ((ssIdx+1)/ssSlides.length*100).toFixed(0)+'%';
+  document.getElementById('ss-progress-fill').style.width = pct;
+  document.getElementById('ss-counter').textContent = (ssIdx+1)+' / '+ssSlides.length;
+  document.getElementById('ss-prev').disabled = ssIdx===0;
+  const nextBtn = document.getElementById('ss-next');
+  if(ssIdx===ssSlides.length-1){
+    nextBtn.textContent='✓ Done';
+    nextBtn.style.background='#22c55e';
+    nextBtn.style.color='#fff';
+    nextBtn.style.borderColor='#22c55e';
+  } else {
+    nextBtn.textContent='Next →';
+    nextBtn.style.background='';
+    nextBtn.style.color='';
+    nextBtn.style.borderColor='';
+  }
+  document.getElementById('ss-slide').scrollTop=0;
+}
+
+document.getElementById('ss-prev').addEventListener('click',()=>{
+  if(ssIdx>0){ssIdx--;renderSlide();}
+});
+let currentPortalId = null;
+
+document.getElementById('ss-next').addEventListener('click',()=>{
+  if(ssIdx<ssSlides.length-1){ssIdx++;renderSlide();}
+  else{
+    if(currentPortalId) unlockAchievement(currentPortalId);
+    document.getElementById('ss-panel').classList.remove('open');
+    canMove=true;
+    showCrosshair();
+  }
+});
+document.getElementById('ss-back').addEventListener('click',()=>{
+  if(currentPortalId) unlockAchievement(currentPortalId);
+  document.getElementById('ss-panel').classList.remove('open');
+  canMove=true;
+  showCrosshair();
+});
+
+// Keyboard nav inside slideshow
+document.addEventListener('keydown',e=>{
+  if(!document.getElementById('ss-panel').classList.contains('open')) return;
+  if(e.code==='ArrowRight'||e.code==='ArrowDown') document.getElementById('ss-next').click();
+  if(e.code==='ArrowLeft'||e.code==='ArrowUp') document.getElementById('ss-prev').click();
+  if(e.code==='Escape'){ if(currentPortalId) unlockAchievement(currentPortalId); document.getElementById('ss-back').click(); }
+});
+
+// ── ACHIEVEMENT SYSTEM ────────────────────────────────────────────
+const ACHIEVEMENTS = [
+  {id:'qc',   icon:'⚡', name:'Clash Scholar',     desc:'Explored Question Clash',         hint:'Enter the Question Clash portal'},
+  {id:'str',  icon:'🏠', name:'Property Genius',   desc:'Explored STR Score',              hint:'Enter the STR Score portal'},
+  {id:'ref',  icon:'🔗', name:'Network Effect',    desc:'Explored Insim Referral',         hint:'Enter the Insim Referral portal'},
+  {id:'ec',   icon:'📅', name:'Event Horizon',     desc:'Explored EventCommand',           hint:'Enter the EventCommand portal'},
+  {id:'about',icon:'👾', name:"Got to Know Saahan", desc:'Explored the About Me portal',   hint:'Find the golden portal in the center'},
+  {id:'myslides',icon:'✏️', name:'Storyteller',        desc:'Explored your own slides',        hint:'Add slides and enter the My Slides portal'},
+];
+
+const earned = new Set(JSON.parse(localStorage.getItem('saahan_achievements')||'[]'));
+
+function renderAchLog(){
+  const list = document.getElementById('ach-list');
+  const count = document.getElementById('ach-count');
+  if(!list) return;
+  count.textContent = earned.size;
+  list.innerHTML = ACHIEVEMENTS.map(a=>`
+    <div class="ach-entry ${earned.has(a.id)?'':'locked'}">
+      <div class="ae-icon">${earned.has(a.id)?a.icon:'❓'}</div>
+      <div class="ae-info">
+        <h5>${earned.has(a.id)?a.name:'???'}</h5>
+        <p>${earned.has(a.id)?a.desc:a.hint}</p>
+      </div>
+    </div>`).join('');
+}
+
+function unlockAchievement(id){
+  if(earned.has(id)) return;
+  earned.add(id);
+  localStorage.setItem('saahan_achievements', JSON.stringify([...earned]));
+  const a = ACHIEVEMENTS.find(x=>x.id===id);
+  if(!a) return;
+  renderAchLog();
+  // Toast popup
+  const toast = document.getElementById('ach-toast');
+  const el = document.createElement('div');
+  el.className = 'ach-pop';
+  el.innerHTML = `<div class="ach-icon">${a.icon}</div><div class="ach-text"><h4>Achievement unlocked</h4><p>${a.name}</p><small>${a.desc}</small></div>`;
+  toast.appendChild(el);
+  setTimeout(()=>{
+    el.classList.add('out');
+    setTimeout(()=>el.remove(), 400);
+  }, 3200);
+}
+
+function toggleAchLog(){
+  document.getElementById('ach-log').classList.toggle('open');
+}
+
+renderAchLog();
+
+
+// ── SLIDE STUDIO ─────────────────────────────────────────────────
+const BG_SWATCHES = ['#0a0a1a','#1a0a2e','#0a1a0a','#1a0a0a','#0a1a1a','#111128',
+  '#7C3AED','#2563EB','#DC2626','#D97706','#059669','#DB2777',
+  '#ffffff','#f1f5f9','#1e293b','#0f172a'];
+
+let stSlides = [];      // [{bg, elements:[{id,type,x,y,w,h,text,fontSize,color,bg,opacity,radius,bold,italic,align}]}]
+let stCur = 0;          // current slide index
+let stSelId = null;     // selected element id
+let stDragging = null;  // {id, ox, oy, startX, startY}
+let stResizing = null;  // {id, startW, startH, startX, startY}
+let stElidCounter = 0;
+let presentIdx = 0;
+
+function stNewSlide(bg='#111128'){
+  return {bg, elements:[]};
+}
+
+function stNewEl(type, x, y){
+  stElidCounter++;
+  const id = 'el_'+stElidCounter;
+  const defaults = {
+    id, type,
+    x: Math.round(x), y: Math.round(y),
+    w: type==='line'?200:type==='circle'?100:240,
+    h: type==='heading'?60:type==='text'?40:type==='line'?4:type==='circle'?100:80,
+    text: type==='heading'?'Heading':type==='text'?'Click to edit':'',
+    fontSize: type==='heading'?36:18,
+    color:'#ffffff',
+    bg: type==='box'?'#7C3AED':type==='circle'?'#EC4899':type==='line'?'#FFD700':'transparent',
+    opacity:100, radius: type==='circle'?50:type==='box'?8:0,
+    bold: type==='heading', italic:false, align:'left'
+  };
+  return defaults;
+}
+
+// ── RENDER ────────────────────────────────────────────────────────
+function renderStudio(){
+  renderThumbs();
+  renderCanvas();
+  updateSlideInfo();
+}
+
+function renderThumbs(){
+  const container = document.getElementById('st-slide-thumbs');
+  container.innerHTML = stSlides.map((sl,i)=>`
+    <div class="slide-thumb ${i===stCur?'active':''}" onclick="switchSlide(${i})" style="background:${sl.bg}">
+      <span class="thumb-num">${i+1}</span>
+      ${stSlides.length>1?`<button class="thumb-del" onclick="event.stopPropagation();deleteSlide(${i})">✕</button>`:''}
+      <svg width="100%" height="100%" viewBox="0 0 160 90" style="pointer-events:none">
+        ${sl.elements.map(el=>thumbEl(el)).join('')}
+      </svg>
+    </div>`).join('');
+}
+
+function thumbEl(el){
+  const x=el.x/100*160, y=el.y/100*90, w=el.w/100*160, h=el.h/100*90;
+  if(el.type==='box'||el.type==='circle'){
+    return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${el.radius/2}" fill="${el.bg}" opacity="${el.opacity/100}"/>`;
+  }
+  if(el.type==='text'||el.type==='heading'){
+    return `<text x="${x+2}" y="${y+h*0.65}" font-size="${Math.max(4,el.fontSize/8)}" fill="${el.color}" font-weight="${el.bold?'bold':'normal'}">${(el.text||'').slice(0,20)}</text>`;
+  }
+  if(el.type==='line'){
+    return `<rect x="${x}" y="${y}" width="${w}" height="2" fill="${el.bg}" opacity="${el.opacity/100}"/>`;
+  }
+  return '';
+}
+
+function renderCanvas(){
+  const slide = stSlides[stCur];
+  if(!slide) return;
+  const canvas = document.getElementById('st-slide-canvas');
+  canvas.style.background = slide.bg;
+  const layer = document.getElementById('el-layer');
+  layer.innerHTML = '';
+  slide.elements.forEach(el => {
+    const div = document.createElement('div');
+    div.className = 'st-el' + (el.id===stSelId?' selected':'');
+    div.id = 'sel_'+el.id;
+    div.style.cssText = `
+      left:${el.x}%; top:${el.y}%; width:${el.w}%; height:${el.h}%;
+      background:${el.type==='text'||el.type==='heading'?'transparent':el.bg};
+      opacity:${el.opacity/100};
+      border-radius:${el.radius}%;
+      ${el.type==='line'?'border-top:3px solid '+el.bg+';background:transparent;height:0;':''}
+    `;
+
+    if(el.type==='text'||el.type==='heading'){
+      const inner = document.createElement('textarea');
+      inner.className = 'st-el-text';
+      inner.spellcheck = false;
+      inner.style.cssText = `
+        font-size:${el.fontSize}px;color:${el.color};
+        font-weight:${el.bold?'bold':'normal'};
+        font-style:${el.italic?'italic':'normal'};
+        text-align:${el.align||'left'};
+        background:transparent;border:none;outline:none;resize:none;
+        width:100%;height:100%;padding:8px 10px;box-sizing:border-box;
+        overflow:hidden;line-height:1.3;font-family:inherit;
+      `;
+      inner.value = el.text||'';
+      inner.addEventListener('input',()=>{
+        el.text=inner.value;
+        const pt=document.getElementById('pp-text'); if(pt) pt.value=el.text;
+        clearTimeout(window._thumbTimer); window._thumbTimer=setTimeout(renderThumbs,400);
+        autoSaveStudio();
+      });
+      inner.addEventListener('focus',()=>selectEl(el.id));
+      inner.addEventListener('mousedown',ev=>ev.stopPropagation());
+      div.appendChild(inner);
+    }
+
+    // Delete button
+    const del = document.createElement('button');
+    del.className = 'el-del';
+    del.textContent = '✕';
+    del.addEventListener('click',e=>{ e.stopPropagation(); deleteEl(el.id); });
+    div.appendChild(del);
+
+    // Resize handle (not for line/circle)
+    if(el.type!=='line'){
+      const handle = document.createElement('div');
+      handle.className = 'el-handle';
+      handle.addEventListener('mousedown',e=>{ e.stopPropagation(); startResize(e,el.id); });
+      div.appendChild(handle);
+    }
+
+    // Drag — but NOT when clicking a text field (let the user type)
+    div.addEventListener('mousedown',e=>{
+      if(e.target.classList.contains('el-handle')||e.target.classList.contains('el-del')) return;
+      if(e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT'||e.target.classList.contains('st-el-text')){ selectEl(el.id); return; }
+      startDrag(e,el.id);
+    });
+    div.addEventListener('click',e=>{ e.stopPropagation(); selectEl(el.id); });
+
+    layer.appendChild(div);
+  });
+}
+
+// ── DRAG & RESIZE ─────────────────────────────────────────────────
+function getCanvasRect(){ const el=document.getElementById('st-slide-canvas'); return el?el.getBoundingClientRect():null; }
+
+function startDrag(e, id){
+  selectEl(id);
+  const el = getEl(id);
+  const r = getCanvasRect();
+  stDragging = { id, startX: e.clientX, startY: e.clientY, ox: el.x, oy: el.y };
+  e.preventDefault();
+}
+
+function startResize(e, id){
+  selectEl(id);
+  const el = getEl(id);
+  stResizing = { id, startX: e.clientX, startY: e.clientY, sw: el.w, sh: el.h };
+  e.preventDefault();
+}
+
+document.addEventListener('mousemove', e=>{
+  if(!stDragging && !stResizing) return;
+  const r = getCanvasRect();
+  if(!r) return;
+  if(stDragging){
+    const el = getEl(stDragging.id);
+    const dx = (e.clientX - stDragging.startX) / r.width * 100;
+    const dy = (e.clientY - stDragging.startY) / r.height * 100;
+    el.x = Math.max(0, Math.min(95, stDragging.ox + dx));
+    el.y = Math.max(0, Math.min(95, stDragging.oy + dy));
+    const div = document.getElementById('sel_'+el.id);
+    if(div){ div.style.left=el.x+'%'; div.style.top=el.y+'%'; }
+    updatePosProp(el);
+  }
+  if(stResizing){
+    const el = getEl(stResizing.id);
+    const dx = (e.clientX - stResizing.startX) / r.width * 100;
+    const dy = (e.clientY - stResizing.startY) / r.height * 100;
+    el.w = Math.max(5, stResizing.sw + dx);
+    el.h = Math.max(3, stResizing.sh + dy);
+    const div = document.getElementById('sel_'+el.id);
+    if(div){ div.style.width=el.w+'%'; div.style.height=el.h+'%'; }
+    updatePosProp(el);
+  }
+});
+
+document.addEventListener('mouseup', ()=>{
+  if(stDragging||stResizing){ renderThumbs(); autoSaveStudio(); }
+  stDragging=null; stResizing=null;
+});
+
+// ── SELECTION ─────────────────────────────────────────────────────
+function selectEl(id){
+  stSelId = id;
+  const el = getEl(id);
+  document.getElementById('st-no-sel').style.display='none';
+  document.getElementById('st-prop-panels').style.display='block';
+  if(!el) return;
+  document.getElementById('pp-text').value = el.text||'';
+  document.getElementById('pp-fs').value = el.fontSize||18;
+  document.getElementById('pp-fs-v').textContent = el.fontSize||18;
+  document.getElementById('pp-color').value = el.color||'#ffffff';
+  document.getElementById('pp-bg').value = el.bg||'#7C3AED';
+  document.getElementById('pp-opacity').value = el.opacity??100;
+  document.getElementById('pp-op-v').textContent = (el.opacity??100)+'%';
+  document.getElementById('pp-radius').value = el.radius||0;
+  document.getElementById('pp-rad-v').textContent = el.radius||0;
+  document.getElementById('pp-bold').classList.toggle('active', !!el.bold);
+  document.getElementById('pp-italic').classList.toggle('active', !!el.italic);
+  updatePosProp(el);
+  // highlight selected
+  document.querySelectorAll('.st-el').forEach(d=>d.classList.remove('selected'));
+  const div = document.getElementById('sel_'+id);
+  if(div) div.classList.add('selected');
+}
+
+function deselect(){
+  stSelId=null;
+  document.querySelectorAll('.st-el').forEach(d=>d.classList.remove('selected'));
+  document.getElementById('st-no-sel').style.display='block';
+  document.getElementById('st-prop-panels').style.display='none';
+}
+
+function updatePosProp(el){
+  document.getElementById('pp-x').value = Math.round(el.x);
+  document.getElementById('pp-y').value = Math.round(el.y);
+  document.getElementById('pp-w').value = Math.round(el.w);
+  document.getElementById('pp-h').value = Math.round(el.h);
+}
+
+function bindCanvasClicks(){
+  if(window._canvasClicksBound) return;
+  window._canvasClicksBound = true;
+  document.getElementById('el-layer').addEventListener('click',e=>{
+    if(e.target===e.currentTarget) deselect();
+  });
+  document.getElementById('st-slide-canvas').addEventListener('click',e=>{
+    if(e.target===document.getElementById('el-layer')||e.target===document.getElementById('st-slide-canvas')) deselect();
+  });
+}
+
+// ── ELEMENT OPS ───────────────────────────────────────────────────
+function getEl(id){ return stSlides[stCur]?.elements.find(e=>e.id===id); }
+
+function addEl(type){
+  const el = stNewEl(type, 20, 20);
+  stSlides[stCur].elements.push(el);
+  renderCanvas();
+  selectEl(el.id);
+  autoSaveStudio();
+}
+
+function deleteEl(id){
+  stSlides[stCur].elements = stSlides[stCur].elements.filter(e=>e.id!==id);
+  if(stSelId===id) deselect();
+  renderCanvas(); renderThumbs(); autoSaveStudio();
+}
+
+function deleteSelected(){ if(stSelId) deleteEl(stSelId); }
+
+document.addEventListener('keydown', e=>{
+  if(!document.getElementById('studio').classList.contains('open')) return;
+  const t=e.target;
+  const typing = t && (t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable);
+  if(e.code==='Delete'&&stSelId&&!typing) deleteSelected();
+  if(e.code==='Escape'&&!typing) deselect();
+});
+
+// ── PROPERTY APPLY ────────────────────────────────────────────────
+function applyProp(prop){
+  const el = getEl(stSelId); if(!el) return;
+  const div = document.getElementById('sel_'+el.id);
+  if(prop==='text'){
+    el.text = document.getElementById('pp-text').value;
+    if(div){ const t=div.querySelector('.st-el-text'); if(t && t!==document.activeElement && t.value!==el.text) t.value=el.text; }
+    clearTimeout(window._thumbTimer); window._thumbTimer=setTimeout(renderThumbs,400);
+    autoSaveStudio(); return;
+  }
+  if(prop==='fontSize'){ el.fontSize=+document.getElementById('pp-fs').value; if(div){const t=div.querySelector('.st-el-text'); if(t)t.style.fontSize=el.fontSize+'px';} renderThumbs(); autoSaveStudio(); return; }
+  if(prop==='color'){ el.color=document.getElementById('pp-color').value; if(div){const t=div.querySelector('.st-el-text'); if(t)t.style.color=el.color;} renderThumbs(); autoSaveStudio(); return; }
+  if(prop==='bg'){ el.bg=document.getElementById('pp-bg').value; if(div && el.type!=='text' && el.type!=='heading'){ if(el.type==='line'){div.style.borderTop='3px solid '+el.bg;}else{div.style.background=el.bg;} } renderThumbs(); autoSaveStudio(); return; }
+  if(prop==='opacity'){ el.opacity=+document.getElementById('pp-opacity').value; if(div)div.style.opacity=el.opacity/100; renderThumbs(); autoSaveStudio(); return; }
+  if(prop==='radius'){ el.radius=+document.getElementById('pp-radius').value; if(div)div.style.borderRadius=el.radius+'%'; renderThumbs(); autoSaveStudio(); return; }
+  if(prop==='x'){ el.x=+document.getElementById('pp-x').value; if(div)div.style.left=el.x+'%'; renderThumbs(); autoSaveStudio(); return; }
+  if(prop==='y'){ el.y=+document.getElementById('pp-y').value; if(div)div.style.top=el.y+'%'; renderThumbs(); autoSaveStudio(); return; }
+  if(prop==='w'){ el.w=+document.getElementById('pp-w').value; if(div)div.style.width=el.w+'%'; renderThumbs(); autoSaveStudio(); return; }
+  if(prop==='h'){ el.h=+document.getElementById('pp-h').value; if(div)div.style.height=el.h+'%'; renderThumbs(); autoSaveStudio(); return; }
+}
+
+function applyAlign(a){ const el=getEl(stSelId);if(!el)return;el.align=a;renderCanvas();autoSaveStudio(); }
+function toggleBold(){ const el=getEl(stSelId);if(!el)return;el.bold=!el.bold;renderCanvas();document.getElementById('pp-bold').classList.toggle('active',el.bold);autoSaveStudio(); }
+function toggleItalic(){ const el=getEl(stSelId);if(!el)return;el.italic=!el.italic;renderCanvas();document.getElementById('pp-italic').classList.toggle('active',el.italic);autoSaveStudio(); }
+function setSliderBg(col){ stSlides[stCur].bg=col;document.getElementById('st-slide-canvas').style.background=col;renderThumbs();autoSaveStudio(); }
+
+// Build bg swatches
+function buildBgSwatches(){
+  const row = document.getElementById('bg-swatches');
+  if(row.childElementCount) return; // already built
+
+  BG_SWATCHES.forEach(col=>{
+    const d=document.createElement('div');
+    d.className='prop-swatch';
+    d.style.background=col;
+    d.title=col;
+    d.addEventListener('click',()=>{ setSliderBg(col); document.getElementById('pp-slide-bg').value=col; });
+    row.appendChild(d);
+  });
+}
+
+// ── SLIDE MANAGEMENT ──────────────────────────────────────────────
+function addSlideStudio(){
+  stSlides.push(stNewSlide());
+  stCur = stSlides.length-1;
+  renderStudio(); deselect(); autoSaveStudio();
+}
+
+function switchSlide(i){ stCur=i; renderStudio(); deselect(); }
+
+function deleteSlide(i){
+  if(stSlides.length<=1) return;
+  stSlides.splice(i,1);
+  stCur=Math.min(stCur,stSlides.length-1);
+  renderStudio(); deselect(); autoSaveStudio();
+}
+
+function dupSlide(){
+  const copy = JSON.parse(JSON.stringify(stSlides[stCur]));
+  // new ids
+  copy.elements.forEach(el=>{ stElidCounter++; el.id='el_'+stElidCounter; });
+  stSlides.splice(stCur+1,0,copy);
+  stCur++;
+  renderStudio(); deselect(); autoSaveStudio();
+}
+
+function clearSlide(){ stSlides[stCur].elements=[]; renderStudio(); deselect(); autoSaveStudio(); }
+function updateSlideInfo(){ document.getElementById('st-slide-info').textContent=`Slide ${stCur+1} of ${stSlides.length}`; }
+
+// ── SAVE/LOAD ─────────────────────────────────────────────────────
+// ── DECK MANAGER (multiple saved slideshows) ────────────────────
+let savedDecks = [];        // [{id, name, slides, counter, updated}]
+let currentDeckId = null;   // id of the deck being edited (null = new unsaved)
+
+async function loadDecks(){
+  try {
+    const r = await window.storage.get('saahan_decks');
+    if(r?.value){ savedDecks = JSON.parse(r.value); return; }
+  } catch(e){}
+  const local = localStorage.getItem('saahan_decks');
+  if(local){ try{ savedDecks = JSON.parse(local); }catch(e){ savedDecks=[]; } }
+}
+
+async function persistDecks(){
+  try {
+    await window.storage.set('saahan_decks', JSON.stringify(savedDecks));
+  } catch(e){
+    localStorage.setItem('saahan_decks', JSON.stringify(savedDecks));
+  }
+}
+
+// Save the current deck (creates or updates), files it away, then shows the deck list
+async function saveStudio(silent){
+  // require at least some content
+  const hasContent = stSlides.some(s=>s.elements.length);
+  if(!hasContent){ if(!silent) showStudioToast('Add some content first'); return; }
+
+  let name;
+  if(currentDeckId){
+    const existing = savedDecks.find(d=>d.id===currentDeckId);
+    name = existing?.name || 'Untitled deck';
+  } else {
+    name = prompt('Name this slideshow:', 'My Slideshow '+(savedDecks.length+1));
+    if(name===null) return; // cancelled
+    if(!name.trim()) name = 'Untitled deck';
+  }
+
+  const deck = {
+    id: currentDeckId || ('deck_'+Date.now()),
+    name: name.trim(),
+    slides: JSON.parse(JSON.stringify(stSlides)),
+    counter: stElidCounter,
+    updated: Date.now()
+  };
+  const idx = savedDecks.findIndex(d=>d.id===deck.id);
+  if(idx>=0) savedDecks[idx]=deck; else savedDecks.push(deck);
+  await persistDecks();
+
+  if(!silent){
+    showStudioToast('Saved "'+deck.name+'" ✓');
+    // File it away: clear the editor and show the deck list
+    setTimeout(()=>{ newDeck(); openDeckList(); }, 700);
+  }
+}
+
+// Silent autosave keeps the in-progress deck backed up under its own id
+function autoSaveStudio(){
+  clearTimeout(window._stSaveTimer);
+  window._stSaveTimer=setTimeout(async ()=>{
+    if(!currentDeckId) return; // don't autosave unnamed drafts
+    const hasContent = stSlides.some(s=>s.elements.length);
+    if(!hasContent) return;
+    const deck = savedDecks.find(d=>d.id===currentDeckId);
+    if(deck){ deck.slides=JSON.parse(JSON.stringify(stSlides)); deck.counter=stElidCounter; deck.updated=Date.now(); await persistDecks(); }
+  },1500);
+}
+
+// Start a fresh, blank deck
+function newDeck(){
+  currentDeckId = null;
+  stSlides = [stNewSlide('#111128')];
+  const h = stNewEl('heading',10,10);
+  h.text="My Presentation"; h.fontSize=48; h.color='#FFD700'; h.bold=true;
+  const s = stNewEl('text',10,40);
+  s.text="Click any element to edit. Use the ribbon to add more."; s.fontSize=18; s.color='rgba(255,255,255,0.7)';
+  stSlides[0].elements.push(h,s);
+  stCur=0;
+  renderStudio();
+  deselect();
+}
+
+
+// ── ABOUT ME TEMPLATE (fill-in-the-blanks) ───────────────────────
+function loadAboutMeTemplate(){
+  currentDeckId = null;
+  stSlides = [];
+
+  // Helper to build a slide with a heading + a list of prompt text boxes
+  function slide(bg, headingText, headingColor, prompts){
+    const sl = stNewSlide(bg);
+    const h = stNewEl('heading', 8, 8);
+    h.text = headingText; h.fontSize = 40; h.color = headingColor; h.bold = true;
+    h.w = 84; h.h = 16;
+    sl.elements.push(h);
+    let y = 30;
+    prompts.forEach(p=>{
+      const t = stNewEl('text', 8, y);
+      t.text = p; t.fontSize = 22; t.color = '#ffffff';
+      t.w = 84; t.h = 12;
+      sl.elements.push(t);
+      y += 15;
+    });
+    return sl;
+  }
+
+  // Slide 1 — Who am I
+  stSlides.push(slide('#1a0a2e', 'About Me', '#FFD700', [
+    'My name is ____________',
+    'I am ____ years old',
+    'In one sentence, I am someone who ____________'
+  ]));
+
+  // Slide 2 — What I do / love
+  stSlides.push(slide('#0a1a2e', 'What I Do', '#EC4899', [
+    'I love building ____________',
+    'My favorite project is ____________ because ____________',
+    'A skill I am proud of is ____________'
+  ]));
+
+  // Slide 3 — Goals
+  stSlides.push(slide('#0a2e1a', 'My Goals', '#22C55E', [
+    'One day I want to ____________',
+    'A problem I want to solve is ____________',
+    'In 5 years I hope to ____________'
+  ]));
+
+  // Slide 4 — Fun facts
+  stSlides.push(slide('#2e1a0a', 'Fun Facts', '#F59E0B', [
+    'When I am not building, I like to ____________',
+    'Something most people do not know about me is ____________',
+    'My favorite thing about creating is ____________'
+  ]));
+
+  stElidCounter = stElidCounter; // keep counter
+  stCur = 0;
+  renderStudio();
+  deselect();
+  showStudioToast('About Me template loaded — click each line and fill it in!');
+}
+
+// Open an existing saved deck for editing
+function openDeck(id){
+  const deck = savedDecks.find(d=>d.id===id);
+  if(!deck) return;
+  currentDeckId = deck.id;
+  stSlides = JSON.parse(JSON.stringify(deck.slides));
+  stElidCounter = deck.counter||0;
+  stCur = 0;
+  closeDeckList();
+  renderStudio();
+  deselect();
+}
+
+async function deleteDeck(id){
+  savedDecks = savedDecks.filter(d=>d.id!==id);
+  await persistDecks();
+  renderDeckList();
+}
+
+// keep loadStudio name working (used on studio open) — starts fresh
+async function loadStudio(){
+  // Open straight into the fill-in About Me template so there's something
+  // ready to edit. The deck library loads in the background.
+  loadAboutMeTemplate();
+  loadDecks(); // async, only fills the savedDecks list for "My Slideshows"
+}
+
+// ── DECK LIST OVERLAY ─────────────────────────────────────────────
+function openDeckList(){
+  renderDeckList();
+  document.getElementById('deck-list-overlay').classList.add('open');
+}
+function closeDeckList(){ document.getElementById('deck-list-overlay').classList.remove('open'); }
+
+function renderDeckList(){
+  const grid = document.getElementById('deck-grid');
+  if(!savedDecks.length){
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,.3);font-size:14px;padding:30px 0;">No saved slideshows yet. Create one and hit Save.</div>';
+    return;
+  }
+  grid.innerHTML = savedDecks.slice().sort((a,b)=>b.updated-a.updated).map(d=>{
+    const first = d.slides[0];
+    const bg = first?.bg || '#111128';
+    return `<div class="deck-card" onclick="openDeck('${d.id}')">
+      <button class="deck-del" onclick="event.stopPropagation();deleteDeck('${d.id}')">Delete</button>
+      <div class="deck-thumb" style="background:${bg}">
+        <svg width="100%" height="100%" viewBox="0 0 160 90" style="pointer-events:none">
+          ${(first?.elements||[]).map(el=>thumbEl(el)).join('')}
+        </svg>
+      </div>
+      <div class="deck-name">${d.name}</div>
+      <div class="deck-meta">${d.slides.length} slide${d.slides.length!==1?'s':''}</div>
+    </div>`;
+  }).join('');
+}
+
+function showStudioToast(msg){
+  let t=document.getElementById('_sttoast');
+  if(!t){ t=document.createElement('div'); t.id='_sttoast'; t.style.cssText='position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:#FFD700;color:#111;padding:7px 18px;border-radius:8px;font-size:13px;font-weight:700;z-index:700;pointer-events:none;'; document.body.appendChild(t); }
+  t.textContent=msg; t.style.opacity='1';
+  clearTimeout(t._t); t._t=setTimeout(()=>t.style.opacity='0',1800);
+}
+
+// ── OPEN / CLOSE STUDIO ───────────────────────────────────────────
+function openStudio(){
+  if(document.exitPointerLock) document.exitPointerLock();
+  canMove = false;
+  document.getElementById('studio').classList.add('open');
+  loadStudio().then(()=>{ buildBgSwatches(); bindCanvasClicks(); });
+  loadGeneratedWorlds();
+}
+
+function closeStudio(){
+  document.getElementById('studio').classList.remove('open');
+  canMove=true;
+  showCrosshair();
+  unlockAchievement('myslides');
+}
+
+// ── PRESENT MODE ──────────────────────────────────────────────────
+function presentSlides(){
+  presentIdx = 0;
+  document.getElementById('present-mode').classList.add('open');
+  renderPresent();
+}
+
+function renderPresent(){
+  const slide = stSlides[presentIdx];
+  const el = document.getElementById('present-slide');
+  el.style.background = slide.bg;
+  el.innerHTML = slide.elements.map(e=>{
+    if(e.type==='text'||e.type==='heading'){
+      return `<div style="position:absolute;left:${e.x}%;top:${e.y}%;width:${e.w}%;height:${e.h}%;
+        font-size:${e.fontSize}px;color:${e.color};font-weight:${e.bold?'bold':'normal'};
+        font-style:${e.italic?'italic':'normal'};text-align:${e.align||'left'};
+        display:flex;align-items:center;padding:4px 6px;word-break:break-word;">${e.text||''}</div>`;
+    }
+    if(e.type==='box'||e.type==='circle'){
+      return `<div style="position:absolute;left:${e.x}%;top:${e.y}%;width:${e.w}%;height:${e.h}%;
+        background:${e.bg};opacity:${e.opacity/100};border-radius:${e.radius}%;"></div>`;
+    }
+    if(e.type==='line'){
+      return `<div style="position:absolute;left:${e.x}%;top:${e.y}%;width:${e.w}%;height:3px;
+        background:${e.bg};opacity:${e.opacity/100};"></div>`;
+    }
+    return '';
+  }).join('');
+  document.getElementById('present-counter').textContent=`${presentIdx+1} / ${stSlides.length}`;
+}
+
+function presentPrev(){ if(presentIdx>0){ presentIdx--; renderPresent(); } }
+function presentNext(){ if(presentIdx<stSlides.length-1){ presentIdx++; renderPresent(); } else closePresent(); }
+function closePresent(){ document.getElementById('present-mode').classList.remove('open'); }
+
+document.addEventListener('keydown',e=>{
+  if(!document.getElementById('present-mode').classList.contains('open')) return;
+  if(e.code==='ArrowRight'||e.code==='Space') presentNext();
+  if(e.code==='ArrowLeft') presentPrev();
+  if(e.code==='Escape') closePresent();
+});
+
+
+// ── WORLD GENERATION + WORLD LIST ────────────────────────────────
+let generatedWorlds = [];   // [{id, name, icon, desc, portals:[{id,label,icon,colorHex,slides:[...]}]}]
+
+const GEN_STEPS = [
+  'Reading your presentation',
+  'Identifying your projects',
+  'Writing portal descriptions',
+  'Designing your world',
+  'Placing portals & signs',
+  'Building the 3D world'
+];
+
+// Fetch all public worlds from the shared backend
+let publicWorlds = [];
+async function loadPublicWorlds(){
+  try {
+    const res = await fetch('/api/listWorlds');
+    if(res.ok){ const d = await res.json(); publicWorlds = d.worlds || []; }
+  } catch(e){ publicWorlds = []; }
+}
+
+async function loadGeneratedWorlds(){
+  try {
+    const r = await window.storage.get('saahan_worlds');
+    if(r?.value) generatedWorlds = JSON.parse(r.value);
+  } catch(e){
+    const local = localStorage.getItem('saahan_worlds');
+    if(local){ try{ generatedWorlds = JSON.parse(local); }catch(e2){} }
+  }
+}
+
+async function saveGeneratedWorlds(){
+  try {
+    await window.storage.set('saahan_worlds', JSON.stringify(generatedWorlds));
+  } catch(e){
+    localStorage.setItem('saahan_worlds', JSON.stringify(generatedWorlds));
+  }
+}
+
+// ── GENERATE WORLD FROM CURRENT PRESENTATION ──────────────────────
+async function generateWorld(){
+  if(!stSlides.length || stSlides.every(s=>!s.elements.length)){
+    alert('Add some slides with content first — the AI reads your slides to build the world.');
+    return;
+  }
+
+  const overlay = document.getElementById('gen-overlay');
+  document.getElementById('gen-active').style.display='flex';
+  document.getElementById('gen-error-box').style.display='none';
+  overlay.classList.add('open');
+  renderGenSteps(0);
+
+  // Flatten the presentation into readable text
+  const deckText = stSlides.map((sl,i)=>{
+    const parts = sl.elements
+      .filter(e=>e.type==='text'||e.type==='heading')
+      .map(e=>(e.type==='heading'?'# ':'')+ (e.text||''))
+      .filter(t=>t.trim());
+    return `--- Slide ${i+1} ---\n${parts.join('\n')}`;
+  }).join('\n\n');
+
+  const prompt = `You are helping build a 3D explorable portfolio world from a presentation. Read the presentation below and extract the projects/topics it describes.
+
+PRESENTATION:
+${deckText}
+
+Return ONLY a JSON object (no markdown, no backticks, no preamble) in exactly this shape:
+{
+  "worldName": "a short world name based on the author or theme",
+  "worldIcon": "a single emoji representing the world",
+  "worldDesc": "one sentence describing the world",
+  "portals": [
+    {
+      "label": "Project name",
+      "icon": "single emoji",
+      "colorHex": "#RRGGBB hex color that fits the project",
+      "slides": [
+        {"eyebrow":"short label","title":"slide title","body":"1-3 sentence description of this project, what it is, how it works, or its features"}
+      ]
+    }
+  ]
+}
+
+Rules:
+- Create ONE portal per distinct project or major topic in the presentation.
+- Each portal should have 2 to 4 slides describing that project (what it is, how it was built, features).
+- If the presentation only describes one project, make one portal with more detailed slides.
+- Pick a distinct colorHex per portal.
+- Keep body text factual and based only on the presentation content.
+- ALWAYS include one extra portal at the end titled "About Me" (label: "About Me", icon: a person emoji like the waving hand or bust emoji, colorHex "#FFD700"). This portal has 2-3 slides introducing the author: who they are, what they do, what they are proud of, and their goals - based on any name, personal details, or theme found in the presentation. If there are no personal details, write a friendly generic introduction that fits the projects shown.
+- Aim for 3-6 portals total (including the About Me portal).`;
+
+  try {
+    renderGenSteps(1);
+
+    let text = '';
+    // First choice: the secure Vercel backend (/api/generate) — key stays on the server.
+    // If that isn't available (e.g. running the file locally), fall back to a
+    // browser-side key stored in Settings.
+    let usedBackend = false;
+    try {
+      const backendRes = await fetch("/api/generate", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({ prompt })
+      });
+      if(backendRes.ok){
+        const d = await backendRes.json();
+        if(d.text){ text = d.text; usedBackend = true; }
+      }
+    } catch(e){ /* backend not reachable — fall through to key mode */ }
+
+    if(!usedBackend){
+      document.getElementById('gen-active').style.display='none';
+      document.getElementById('gen-error-box').style.display='block';
+      document.getElementById('gen-error').innerHTML =
+        'World generation runs through the secure backend. Deploy this on Vercel with the /api/generate function and an OPENAI_API_KEY environment variable, then try again.';
+      return;
+    }
+
+    renderGenSteps(3);
+    text = text.replace(/```json/g,'').replace(/```/g,'').trim();
+    const spec = JSON.parse(text);
+    renderGenSteps(4);
+
+    // Build world object
+    const world = {
+      id: 'gen_'+Date.now(),
+      name: spec.worldName || 'My World',
+      icon: spec.worldIcon || '🌍',
+      desc: spec.worldDesc || 'Generated from a presentation',
+      portals: spec.portals.map((p,i)=>({
+        id: 'genp_'+i,
+        label: p.label || ('Project '+(i+1)),
+        icon: p.icon || '📦',
+        colorHex: p.colorHex || '#FFD700',
+        slides: (p.slides||[]).map(s=>({
+          eyebrow: s.eyebrow||'', title: s.title||'', body: s.body||''
+        }))
+      }))
+    };
+
+    generatedWorlds.push(world);
+    await saveGeneratedWorlds();
+
+    // Also publish it to the shared backend so everyone can see it
+    try {
+      const pubRes = await fetch('/api/saveWorld', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({ world })
+      });
+      if(pubRes.ok){ const d = await pubRes.json(); if(d.id) world.publicId = d.id; }
+    } catch(e){ /* backend not deployed — world still saved locally */ }
+
+    renderGenSteps(6);
+
+    setTimeout(()=>{
+      document.getElementById('gen-overlay').classList.remove('open');
+      // Jump straight into the new world
+      loadWorldById(world.id);
+    }, 700);
+
+  } catch(err){
+    document.getElementById('gen-active').style.display='none';
+    document.getElementById('gen-error-box').style.display='block';
+    document.getElementById('gen-error').textContent =
+      'Could not generate the world: '+(err.message||err)+'. Make sure your slides have text content and try again.';
+  }
+}
+
+function renderGenSteps(activeIdx){
+  const el = document.getElementById('gen-steps');
+  el.innerHTML = GEN_STEPS.map((s,i)=>`
+    <div class="gen-step ${i<activeIdx?'done':i===activeIdx?'active':''}">
+      ${i<activeIdx?'✓':i===activeIdx?'●':'○'} ${s}
+    </div>`).join('');
+  const statusEl = document.getElementById('gen-status');
+  if(statusEl && GEN_STEPS[activeIdx]) statusEl.textContent = GEN_STEPS[activeIdx]+'...';
+}
+
+// ── WORLD SELECT SCREEN ───────────────────────────────────────────
+async function openWorldSelect(){
+  if(document.exitPointerLock) document.exitPointerLock();
+  canMove = false;
+  hideCrosshair();
+  document.getElementById('world-select').classList.add('open');
+  renderWorldList();               // show what we have immediately
+  await loadPublicWorlds();        // fetch everyone's worlds
+  renderWorldList();               // re-render with the public ones
+}
+
+function closeWorldSelect(){
+  document.getElementById('world-select').classList.remove('open');
+  canMove = true;
+  showCrosshair();
+}
+
+function renderWorldList(){
+  const grid = document.getElementById('ws-grid');
+  const official = `
+    <div class="ws-card official" onclick="loadWorldById('saahan')">
+      <div class="ws-icon">🌍</div>
+      <h3>Saahan's World</h3>
+      <p>The original — Question Clash, STR Score, Insim Referral &amp; EventCommand, plus About Saahan.</p>
+      <div class="ws-portals">6 portals</div>
+    </div>`;
+
+  // Your own worlds (can be deleted locally)
+  const gen = generatedWorlds.map(w=>`
+    <div class="ws-card" onclick="loadWorldById('${w.id}')">
+      <button class="ws-del" onclick="event.stopPropagation();deleteGenWorld('${w.id}')">Delete</button>
+      <div class="ws-icon">${w.icon}</div>
+      <h3>${w.name}</h3>
+      <p>${w.desc}</p>
+      <div class="ws-portals">${w.portals.length} portal${w.portals.length!==1?'s':''} · Yours</div>
+    </div>`).join('');
+
+  // Public worlds from the shared backend (skip ones you already made)
+  const myPublicIds = new Set(generatedWorlds.map(w=>w.publicId).filter(Boolean));
+  const pub = publicWorlds.filter(w=>!myPublicIds.has(w.id)).map(w=>`
+    <div class="ws-card" onclick="loadPublicWorld('${w.id}')">
+      <div class="ws-icon">${w.icon}</div>
+      <h3>${w.name}</h3>
+      <p>${w.desc}</p>
+      <div class="ws-portals">${w.portals.length} portal${w.portals.length!==1?'s':''} · 🌍 Community</div>
+    </div>`).join('');
+
+  grid.innerHTML = official + gen + pub;
+}
+
+// Load a public world (from the shared backend) into the 3D scene
+function loadPublicWorld(id){
+  const world = publicWorlds.find(w=>w.id===id);
+  if(!world) return;
+  // temporarily add to generatedWorlds so loadWorldById can use it, then load
+  const temp = { ...world, id:'pub_'+id };
+  if(!generatedWorlds.find(w=>w.id===temp.id)) generatedWorlds.push(temp);
+  loadWorldById(temp.id);
+}
+
+async function deleteGenWorld(id){
+  generatedWorlds = generatedWorlds.filter(w=>w.id!==id);
+  await saveGeneratedWorlds();
+  renderWorldList();
+}
+
+// ── LOAD A WORLD (rebuild the 3D scene) ───────────────────────────
+function loadWorldById(id){
+  document.getElementById('world-select').classList.remove('open');
+  document.getElementById('studio').classList.remove('open');
+
+  if(id==='saahan'){
+    activePortalSet = null; // use default PORTALS_DATA
+    window._activeWorldName = null;
+  } else {
+    const world = generatedWorlds.find(w=>w.id===id);
+    if(!world) return;
+    // Convert generated world into PORTALS_DATA + PROJECT_SLIDES format
+    const portals = world.portals.map((p,i)=>{
+      // arrange portals in a circle
+      const angle = (i/world.portals.length)*Math.PI*2;
+      const radius = 16;
+      const px = Math.round(Math.cos(angle)*radius);
+      const pz = Math.round(Math.sin(angle)*radius);
+      // register slides
+      PROJECT_SLIDES[p.id] = p.slides.map(s=>({
+        bg:'#08080f', accent:p.colorHex,
+        render: ac=>`
+          <div class="sl-eyebrow" style="color:${ac}">${s.eyebrow||'Project'}</div>
+          <div class="sl-h1" style="font-size:clamp(24px,3.5vw,44px)">${s.title||''}</div>
+          <div class="sl-divider" style="background:${ac}"></div>
+          <div class="sl-sub">${(s.body||'').replace(/\n/g,'<br>')}</div>`
+      }));
+      return {
+        id:p.id, label:p.label, icon:p.icon,
+        color: parseInt(p.colorHex.replace('#','0x')),
+        colorHex:p.colorHex,
+        pos:{x:px,z:pz}, angle: angle+Math.PI,
+        subtitle: world.name,
+        stack:[], link:null
+      };
+    });
+    activePortalSet = portals;
+    window._activeWorldName = world.name.toUpperCase();
+  }
+
+  // Rebuild the scene with the chosen portals
+  rebuildWorld();
+  canMove = true;
+  showCrosshair();
+  const wname = id==='saahan' ? "SAAHAN'S WORLD" : (generatedWorlds.find(w=>w.id===id)?.name||'MY WORLD').toUpperCase();
+  document.getElementById('hud-title').textContent = '🌍 '+wname;
+  document.getElementById('hud-area').textContent = id==='saahan'?"Exploring Saahan's Projects":'Exploring '+(generatedWorlds.find(w=>w.id===id)?.name||'World');
+}
+
+// Esc closes the Worlds tab
+document.addEventListener('keydown',e=>{
+  if(e.code==='Escape' && document.getElementById('world-select').classList.contains('open')){
+    closeWorldSelect();
+  }
+});
+
+// ── PLAY MODE (desktop / mobile) ─────────────────────────────────
+let playMode = 'desktop';
+function setMode(m){
+  playMode = m;
+  document.getElementById('mode-desktop').classList.toggle('active', m==='desktop');
+  document.getElementById('mode-mobile').classList.toggle('active', m==='mobile');
+  document.getElementById('intro-note-desktop').style.display = m==='desktop'?'block':'none';
+  document.getElementById('intro-note-mobile').style.display = m==='mobile'?'block':'none';
+  const kd=document.getElementById('keys-desktop'), km=document.getElementById('keys-mobile');
+  if(kd) kd.style.display = m==='desktop'?'flex':'none';
+  if(km) km.style.display = m==='mobile'?'flex':'none';
+  document.body.classList.toggle('mobile-mode', m==='mobile');
+}
+// Auto-detect touch devices and default to mobile
+function autoDetectMode(){
+  const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints>0;
+  const isSmall = window.innerWidth < 820;
+  if(isTouch || isSmall) setMode('mobile'); else setMode('desktop');
+}
+
+
+// ── START BUTTON ─────────────────────────────────────────────────
+function doStart(){
+  const ss = document.getElementById('start-screen');
+  ss.style.opacity='0';
+  ss.style.transition='opacity .4s';
+  setTimeout(()=>{ ss.style.display='none'; },400);
+  if(!renderer) initMain();
+  canMove=true;
+  setTimeout(showCrosshair,150);
+  loadGeneratedWorlds();
+  // Lock the mouse to center — desktop mode only
+  if(playMode==='desktop'){
+    const el=document.getElementById('c');
+    if(el && el.requestPointerLock){ try{ el.requestPointerLock(); }catch(e){} }
+  }
+}
+autoDetectMode();
+document.getElementById('start-btn').addEventListener('click', doStart);
+// Also allow clicking anywhere on the start screen
+document.getElementById('start-screen').addEventListener('click', doStart);
+</script>
+
+<!-- ── SLIDE STUDIO ── -->
+<div id="studio">
+  <!-- Ribbon -->
+  <div id="st-ribbon">
+    <div class="rb-logo">✏️ SLIDE STUDIO</div>
+    <div class="rb-group">
+      <span class="rb-label">Insert</span>
+      <button class="rb-btn" onclick="addEl('text')">T Text</button>
+      <button class="rb-btn" onclick="addEl('heading')">H Heading</button>
+      <button class="rb-btn" onclick="addEl('box')">▬ Box</button>
+      <button class="rb-btn" onclick="addEl('circle')">● Circle</button>
+      <button class="rb-btn" onclick="addEl('line')">― Line</button>
+    </div>
+    <div class="rb-group">
+      <span class="rb-label">Slide</span>
+      <button class="rb-btn" onclick="dupSlide()">⧉ Duplicate</button>
+      <button class="rb-btn" onclick="clearSlide()">🗑 Clear</button>
+    </div>
+    <div class="rb-group">
+      <span class="rb-label">Deck</span>
+      <button class="rb-btn" onclick="saveStudio()">💾 Save</button>
+      <button class="rb-btn" onclick="openDeckList()">📂 Slideshows</button>
+      <button class="rb-btn" onclick="newDeck()">＋ New</button>
+      <button class="rb-btn active" onclick="presentSlides()">▶ Present</button>
+    </div>
+    <div class="rb-group">
+      <span class="rb-label">Template</span>
+      <button class="rb-btn" onclick="loadAboutMeTemplate()">📝 About Me</button>
+    </div>
+    <div class="rb-group">
+      <span class="rb-label">AI</span>
+      <button class="rb-btn" style="background:linear-gradient(90deg,#7C3AED,#EC4899);border:none;color:#fff;" onclick="generateWorld()">✨ Generate World</button>
+    </div>
+    <button class="rb-btn rb-exit danger" onclick="closeStudio()">✕ Exit</button>
+  </div>
+  <!-- Body -->
+  <div id="st-body">
+    <!-- Slide thumbnails -->
+    <div id="st-slides-panel">
+      <div class="sp-header">Slides</div>
+      <div id="st-slide-thumbs"></div>
+      <div id="sp-add-btn" onclick="addSlideStudio()">+ New Slide</div>
+    </div>
+    <!-- Canvas -->
+    <div id="st-canvas-area">
+      <div id="st-slide-canvas">
+        <div class="el-layer" id="el-layer"></div>
+      </div>
+    </div>
+    <!-- Properties -->
+    <div id="st-props">
+      <div id="st-no-sel">Click an element to edit its properties, or click the canvas to add elements.</div>
+      <div id="st-prop-panels" style="display:none;">
+        <div class="prop-section">
+          <h4>Text</h4>
+          <div class="prop-row"><span class="prop-label">Content</span><input class="prop-input" id="pp-text" placeholder="Type here..." oninput="applyProp('text')"></div>
+          <div class="prop-row"><span class="prop-label">Size</span><input type="range" class="prop-slider" id="pp-fs" min="8" max="120" value="24" oninput="applyProp('fontSize');document.getElementById('pp-fs-v').textContent=this.value"><span class="prop-val" id="pp-fs-v">24</span></div>
+          <div class="prop-row"><span class="prop-label">Color</span><input type="color" class="prop-color" id="pp-color" value="#ffffff" oninput="applyProp('color')"></div>
+          <div class="prop-row"><span class="prop-label">Align</span>
+            <div class="prop-font-row" style="flex:1">
+              <button class="prop-font-btn" onclick="applyAlign('left')">◀</button>
+              <button class="prop-font-btn" onclick="applyAlign('center')">▬</button>
+              <button class="prop-font-btn" onclick="applyAlign('right')">▶</button>
+            </div>
+          </div>
+          <div class="prop-row"><span class="prop-label">Style</span>
+            <div class="prop-font-row" style="flex:1">
+              <button class="prop-font-btn" id="pp-bold" onclick="toggleBold()"><b>B</b></button>
+              <button class="prop-font-btn" id="pp-italic" onclick="toggleItalic()"><i>I</i></button>
+            </div>
+          </div>
+        </div>
+        <div class="prop-section">
+          <h4>Background</h4>
+          <div class="prop-row"><span class="prop-label">Fill</span><input type="color" class="prop-color" id="pp-bg" value="#7C3AED" oninput="applyProp('bg')"></div>
+          <div class="prop-row"><span class="prop-label">Opacity</span><input type="range" class="prop-slider" id="pp-opacity" min="0" max="100" value="100" oninput="applyProp('opacity');document.getElementById('pp-op-v').textContent=this.value+'%'"><span class="prop-val" id="pp-op-v">100%</span></div>
+          <div class="prop-row"><span class="prop-label">Radius</span><input type="range" class="prop-slider" id="pp-radius" min="0" max="100" value="0" oninput="applyProp('radius');document.getElementById('pp-rad-v').textContent=this.value"><span class="prop-val" id="pp-rad-v">0</span></div>
+        </div>
+        <div class="prop-section">
+          <h4>Position &amp; Size</h4>
+          <div class="prop-row"><span class="prop-label">X</span><input type="number" class="prop-input" id="pp-x" oninput="applyProp('x')"></div>
+          <div class="prop-row"><span class="prop-label">Y</span><input type="number" class="prop-input" id="pp-y" oninput="applyProp('y')"></div>
+          <div class="prop-row"><span class="prop-label">W</span><input type="number" class="prop-input" id="pp-w" oninput="applyProp('w')"></div>
+          <div class="prop-row"><span class="prop-label">H</span><input type="number" class="prop-input" id="pp-h" oninput="applyProp('h')"></div>
+        </div>
+        <div class="prop-section">
+          <h4>Slide background</h4>
+          <div class="prop-swatch-row" id="bg-swatches"></div>
+          <div class="prop-row" style="margin-top:8px;"><span class="prop-label">Custom</span><input type="color" class="prop-color" id="pp-slide-bg" oninput="setSliderBg(this.value)"></div>
+        </div>
+        <div class="prop-section">
+          <button class="rb-btn danger" style="width:100%;justify-content:center;" onclick="deleteSelected()">🗑 Delete element</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="st-bottom">
+    <span id="st-slide-info">Slide 1 of 1</span>
+    <span>Click canvas to deselect · Drag elements to move · Drag corner to resize</span>
+  </div>
+</div>
+
+<!-- Present mode overlay -->
+<div id="present-mode">
+  <div id="present-slide"></div>
+  <div id="present-nav">
+    <button class="pnav-btn" onclick="presentPrev()">← Prev</button>
+    <button class="pnav-btn" onclick="presentNext()">Next →</button>
+    <button class="pnav-btn" onclick="closePresent()" style="background:rgba(239,68,68,.2);border-color:#ef4444;">✕ Stop</button>
+  </div>
+  <div id="present-counter">1 / 1</div>
+</div>
+
+<!-- World Select -->
+<div id="world-select">
+  <h2>🌐 Choose a World</h2>
+  <div class="ws-sub">Explore Saahan's world, or worlds generated from presentations.</div>
+  <div class="ws-grid" id="ws-grid"></div>
+  <button class="ws-back" onclick="closeWorldSelect()">← Back</button>
+</div>
+
+<!-- Generation overlay -->
+<div id="gen-overlay">
+  <div id="gen-active" style="display:flex;flex-direction:column;align-items:center;gap:22px;">
+    <div class="gen-spinner"></div>
+    <h2>✨ Generating your world</h2>
+    <div id="gen-status">Reading your presentation...</div>
+    <div class="gen-steps" id="gen-steps"></div>
+  </div>
+  <div id="gen-error-box" style="display:none;">
+    <div id="gen-error"></div>
+    <button onclick="document.getElementById('gen-overlay').classList.remove('open')">Close</button>
+  </div>
+</div>
+
+
+<!-- Deck list -->
+<div id="deck-list-overlay">
+  <div class="dl-header">
+    <h2>🎞 My Slideshows</h2>
+    <button class="dl-new" onclick="newDeck();closeDeckList();">+ New Slideshow</button>
+    <button class="dl-close" onclick="closeDeckList()">← Back to editor</button>
+  </div>
+  <div id="deck-grid"></div>
+</div>
+</body>
+</html>
 html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Segoe UI',system-ui,sans-serif;}
 #c{display:block;width:100%;height:100%;}
 #crosshair{position:fixed;pointer-events:none;z-index:10;width:20px;height:20px;}
