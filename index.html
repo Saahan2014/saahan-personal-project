@@ -384,6 +384,23 @@ body.mobile-mode #mobile-controls{display:block;}
 .tp-opt .tp-emoji{font-size:24px;}
 .tp-opt .tp-name{font-size:11px;color:rgba(255,255,255,.7);font-weight:700;}
 
+
+/* ── CUSTOMIZER ── */
+#customizer{position:fixed;inset:0;z-index:760;background:rgba(5,5,15,.6);backdrop-filter:blur(4px);display:none;align-items:flex-start;justify-content:flex-end;padding:20px;}
+#customizer.open{display:flex;}
+.cust-box{width:320px;max-width:100%;max-height:calc(100vh - 40px);overflow-y:auto;background:#141428;border:1.5px solid rgba(255,215,0,.4);border-radius:18px;padding:22px;box-shadow:0 0 50px rgba(0,0,0,.5);}
+.cust-box::-webkit-scrollbar{width:4px;} .cust-box::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);}
+.cust-box h3{font-size:19px;font-weight:900;color:#FFD700;margin-bottom:4px;}
+.cust-sub{font-size:12px;color:rgba(255,255,255,.5);line-height:1.5;margin-bottom:16px;}
+.cust-section-title{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,.4);font-weight:800;margin:14px 0 8px;}
+.cust-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.06);}
+.cust-row label{font-size:13px;color:rgba(255,255,255,.75);}
+.cust-row input[type=color]{width:44px;height:30px;border:none;border-radius:7px;cursor:pointer;background:none;}
+.cust-row select{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:7px;color:#fff;font-size:12px;padding:5px 8px;cursor:pointer;}
+.cust-row select option{background:#141428;}
+.cust-row input[type=checkbox]{width:20px;height:20px;accent-color:#FFD700;cursor:pointer;}
+.cust-done{width:100%;margin-top:18px;padding:12px;background:linear-gradient(135deg,#FFE55C,#FFD700,#F5A623);color:#111;border:none;border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;}
+
 </style>
 </head>
 <body>
@@ -416,8 +433,9 @@ body.mobile-mode #mobile-controls{display:block;}
     <p id="hud-area">Main World</p>
   </div>
 </div>
-<button id="worlds-btn" onclick="openWorldSelect()" style="position:fixed;top:60px;left:12px;z-index:160;background:rgba(10,10,18,.9);border:1.5px solid rgba(255,255,255,.25);border-radius:10px;color:#fff;font-size:12px;font-weight:700;padding:7px 14px;cursor:pointer;">🌐 Worlds <span style="opacity:.5;font-size:10px;">(M)</span></button>
-<button id="studio-btn" onclick="openStudio()" style="position:fixed;top:98px;left:12px;z-index:160;background:linear-gradient(90deg,#7C3AED,#EC4899);border:none;border-radius:10px;color:#fff;font-size:12px;font-weight:800;padding:7px 14px;cursor:pointer;box-shadow:0 2px 12px rgba(124,58,237,.4);">✏️ Slide Studio</button>
+<button id="worlds-btn" onclick="openWorldSelect()" style="position:fixed;top:60px;left:12px;z-index:160;background:rgba(10,10,18,.9);border:1.5px solid rgba(255,255,255,.25);border-radius:10px;color:#fff;font-size:12px;font-weight:700;padding:7px 14px;cursor:pointer;">🌐 Worlds <span id="worlds-key-hint" style="opacity:.5;font-size:10px;">(M)</span></button>
+<button id="studio-btn" onclick="openStudio()" style="position:fixed;top:98px;left:12px;z-index:160;background:linear-gradient(90deg,#7C3AED,#EC4899);border:none;border-radius:10px;color:#fff;font-size:12px;font-weight:800;padding:7px 14px;cursor:pointer;box-shadow:0 2px 12px rgba(124,58,237,.4);">✏️ Slide Studio <span id="studio-key-hint" style="opacity:.6;font-size:10px;">(B)</span></button>
+<button id="customize-btn" onclick="openCustomizerDirect()" style="display:none;position:fixed;top:136px;left:12px;z-index:160;background:linear-gradient(90deg,#F59E0B,#EC4899);border:none;border-radius:10px;color:#fff;font-size:12px;font-weight:800;padding:7px 14px;cursor:pointer;box-shadow:0 2px 12px rgba(245,158,11,.4);">🎨 Customize <span id="customize-key-hint" style="opacity:.6;font-size:10px;">(C)</span></button>
 <div id="portal-hint">Walk close &amp; press F or click to enter portal</div>
 
 <!-- Slideshow presentation panel -->
@@ -484,6 +502,8 @@ body.mobile-mode #mobile-controls{display:block;}
       <span class="key">Space</span><span class="keylab">jump</span>
       <span class="key">F</span><span class="keylab">enter portal</span>
       <span class="key">M</span><span class="keylab">worlds</span>
+      <span class="key">B</span><span class="keylab">slide studio</span>
+      <span class="key">C</span><span class="keylab">customize</span>
     </div>
     <div class="keys" id="keys-mobile" style="display:none;">
       <span class="key">🕹 Joystick</span><span class="keylab">move</span>
@@ -630,6 +650,8 @@ const THEMES = {
             ambient:0.45, sun:0xff6633, sunI:1.2, deco:'crystals', starfield:false },
 };
 let activeTheme = 'meadow';
+let currentWorldRef = null;   // the generated-world object currently loaded
+let currentWorldOwned = false; // true only for worlds you created
 function getTheme(){ return THEMES[activeTheme] || THEMES.meadow; }
 
 // ── MAIN SCENE ────────────────────────────────────────────────────
@@ -953,6 +975,14 @@ function setupControls(){
     if(e.code==='KeyM'){
       const ws=document.getElementById('world-select');
       if(ws.classList.contains('open')) closeWorldSelect(); else openWorldSelect();
+    }
+    if(e.code==='KeyB'){
+      const st=document.getElementById('studio');
+      if(st.classList.contains('open')) closeStudio(); else openStudio();
+    }
+    if(e.code==='KeyC'){
+      const cz=document.getElementById('customizer');
+      if(cz.classList.contains('open')) closeCustomizer(); else openCustomizerDirect();
     }
   });
   document.addEventListener('keyup',e=>keys[e.code]=false);
@@ -2251,6 +2281,7 @@ function showStudioToast(msg){
 // ── OPEN / CLOSE STUDIO ───────────────────────────────────────────
 function openStudio(){
   if(document.exitPointerLock) document.exitPointerLock();
+  const cb=document.getElementById('customize-btn'); if(cb) cb.style.display='none';
   canMove = false;
   document.getElementById('studio').classList.add('open');
   loadStudio().then(()=>{ buildBgSwatches(); bindCanvasClicks(); });
@@ -2261,6 +2292,7 @@ function closeStudio(){
   document.getElementById('studio').classList.remove('open');
   canMove=true;
   showCrosshair();
+  const cb=document.getElementById('customize-btn'); if(cb) cb.style.display=currentWorldOwned?'block':'none';
   unlockAchievement('myslides');
 }
 
@@ -2511,29 +2543,105 @@ function closeWorldSelect(){
 }
 
 function renderThemePicker(){
+  const picker=document.getElementById('theme-picker');
   const box=document.getElementById('tp-options');
-  if(!box) return;
-  box.innerHTML = Object.entries(THEMES).map(([key,t])=>`
+  if(!picker||!box) return;
+  // Only worlds YOU created can be customized
+  if(!currentWorldOwned){
+    picker.style.display='none';
+    return;
+  }
+  picker.style.display='block';
+  box.innerHTML = Object.entries(THEMES).filter(([k])=>k!=='_custom').map(([key,t])=>`
     <div class="tp-opt ${key===activeTheme?'active':''}" onclick="applyTheme('${key}')">
       <span class="tp-emoji">${t.icon}</span>
       <span class="tp-name">${t.name}</span>
-    </div>`).join('');
+    </div>`).join('')
+    + `<div class="tp-opt ${activeTheme==='_custom'?'active':''}" onclick="openCustomizer()" style="border-style:dashed;">
+        <span class="tp-emoji">🎨</span><span class="tp-name">Custom</span>
+      </div>`;
 }
 
 function applyTheme(key){
-  if(!THEMES[key]) return;
+  if(!THEMES[key] || !currentWorldOwned) return;
   activeTheme = key;
-  // remember choice per world
-  if(activePortalSet){
-    // find the generated world currently loaded and save its theme
-    const w = generatedWorlds.find(w=>w.name && w.name.toUpperCase()===window._activeWorldName);
-    if(w){ w.theme = key; saveGeneratedWorlds(); }
-  } else {
-    window._saahanTheme = key; // remember for Saahan's world this session
-  }
+  if(currentWorldRef){ currentWorldRef.theme = key; delete currentWorldRef.customTheme; saveGeneratedWorlds(); }
   rebuildWorld();
   renderThemePicker();
   showCrosshair();
+}
+
+// ── CUSTOM THEME EDITOR ──────────────────────────────────────────
+function openCustomizerDirect(){
+  if(!currentWorldOwned){ showStudioToast ? showStudioToast('Only worlds you create can be customized') : alert('Only worlds you create can be customized'); return; }
+  openCustomizer();
+}
+function openCustomizer(){
+  if(!currentWorldOwned) return;
+  // seed the custom theme from the current active theme
+  const base = THEMES[activeTheme] || THEMES.meadow;
+  const cur = (currentWorldRef && currentWorldRef.customTheme) ? currentWorldRef.customTheme : JSON.parse(JSON.stringify(base));
+  const hex = n => '#'+('000000'+(n>>>0).toString(16)).slice(-6);
+  const fields = [
+    ['sky','Sky color'], ['fog','Fog / haze'], ['ground','Ground'],
+    ['path','Paths'], ['plaza','Center plaza'], ['tree','Trees / crystals'],
+    ['bush','Bushes'], ['trunk','Tree trunks']
+  ];
+  document.getElementById('cust-fields').innerHTML = fields.map(([k,label])=>`
+    <div class="cust-row">
+      <label>${label}</label>
+      <input type="color" value="${hex(cur[k])}" oninput="setCustomColor('${k}',this.value)">
+    </div>`).join('') + `
+    <div class="cust-row">
+      <label>Decorations</label>
+      <select onchange="setCustomDeco(this.value)">
+        <option value="trees" ${cur.deco==='trees'?'selected':''}>🌳 Trees</option>
+        <option value="crystals" ${cur.deco==='crystals'?'selected':''}>💎 Crystals</option>
+      </select>
+    </div>
+    <div class="cust-row">
+      <label>Stars in sky</label>
+      <input type="checkbox" ${cur.starfield?'checked':''} onchange="setCustomStars(this.checked)">
+    </div>`;
+  // store working copy
+  THEMES._custom = cur;
+  activeTheme = '_custom';
+  renderPortalColorList();
+  document.getElementById('customizer').classList.add('open');
+}
+function closeCustomizer(){
+  document.getElementById('customizer').classList.remove('open');
+  // save it to the world
+  if(currentWorldRef){ currentWorldRef.customTheme = THEMES._custom; currentWorldRef.theme='_custom'; saveGeneratedWorlds(); }
+  renderThemePicker();
+}
+function hexToInt(h){ return parseInt(h.replace('#','0x')); }
+function setCustomColor(key,val){ THEMES._custom[key]=hexToInt(val); rebuildWorld(); showCrosshair(); }
+function setCustomDeco(val){ THEMES._custom.deco=val; rebuildWorld(); showCrosshair(); }
+function setCustomStars(on){ THEMES._custom.starfield=on; rebuildWorld(); showCrosshair(); }
+
+// Also let the customizer change individual PORTAL colors
+function renderPortalColorList(){
+  const box=document.getElementById('cust-portals');
+  if(!box) return;
+  if(!activePortalSet){ box.innerHTML=''; return; }
+  const hex = n => (typeof n==='string'?n:'#'+('000000'+(n>>>0).toString(16)).slice(-6));
+  box.innerHTML = activePortalSet.map((p,i)=>`
+    <div class="cust-row">
+      <label>${p.icon||''} ${p.label}</label>
+      <input type="color" value="${p.colorHex||hex(p.color)}" oninput="setPortalColor(${i},this.value)">
+    </div>`).join('');
+}
+function setPortalColor(i,val){
+  if(!activePortalSet||!activePortalSet[i]) return;
+  activePortalSet[i].colorHex = val;
+  activePortalSet[i].color = hexToInt(val);
+  // persist to the world object
+  if(currentWorldRef && currentWorldRef.portals && currentWorldRef.portals[i]){
+    currentWorldRef.portals[i].colorHex = val;
+    saveGeneratedWorlds();
+  }
+  rebuildWorld(); showCrosshair();
 }
 
 function renderWorldList(){
@@ -2590,10 +2698,12 @@ function loadWorldById(id){
   document.getElementById('world-select').classList.remove('open');
   document.getElementById('studio').classList.remove('open');
 
+  currentWorldRef = null;
+  currentWorldOwned = false;
   if(id==='saahan'){
     activePortalSet = null; // use default PORTALS_DATA
     window._activeWorldName = null;
-    activeTheme = window._saahanTheme || 'meadow';
+    activeTheme = 'meadow';
   } else {
     const world = generatedWorlds.find(w=>w.id===id);
     if(!world) return;
@@ -2621,12 +2731,18 @@ function loadWorldById(id){
     activePortalSet = portals;
     activeTheme = (world.theme && THEMES[world.theme]) ? world.theme : 'meadow';
     window._activeWorldName = world.name.toUpperCase();
+    currentWorldRef = world;
+    // "owned" = you made it (id starts with gen_), not a community world (pub_)
+    currentWorldOwned = id.startsWith('gen_');
+    // apply any saved custom colors
+    if(world.customTheme){ THEMES._custom = world.customTheme; activeTheme='_custom'; }
   }
 
   // Rebuild the scene with the chosen portals
   rebuildWorld();
   canMove = true;
   showCrosshair();
+  const cbtn=document.getElementById('customize-btn'); if(cbtn) cbtn.style.display = currentWorldOwned?'block':'none';
   const wname = id==='saahan' ? "SAAHAN'S WORLD" : (generatedWorlds.find(w=>w.id===id)?.name||'MY WORLD').toUpperCase();
   document.getElementById('hud-title').textContent = '🌍 '+wname;
   document.getElementById('hud-area').textContent = id==='saahan'?"Exploring Saahan's Projects":'Exploring '+(generatedWorlds.find(w=>w.id===id)?.name||'World');
@@ -2653,6 +2769,10 @@ function setMode(m){
   const ssd=document.getElementById('spawn-switch-desktop'), ssm=document.getElementById('spawn-switch-mobile');
   if(ssd) ssd.style.display = m==='desktop'?'block':'none';
   if(ssm) ssm.style.display = m==='mobile'?'block':'none';
+  const wkh=document.getElementById('worlds-key-hint'), skh=document.getElementById('studio-key-hint'), ckh=document.getElementById('customize-key-hint');
+  if(wkh) wkh.style.display = m==='mobile'?'none':'inline';
+  if(skh) skh.style.display = m==='mobile'?'none':'inline';
+  if(ckh) ckh.style.display = m==='mobile'?'none':'inline';
   document.body.classList.toggle('mobile-mode', m==='mobile');
 }
 // Auto-detect touch devices and default to mobile
@@ -2820,8 +2940,8 @@ document.getElementById('start-btn').addEventListener('click', doStart);
   <div class="ws-sub">Explore Saahan's world, or worlds generated from presentations.</div>
   <div class="ws-grid" id="ws-grid"></div>
 
-  <div class="theme-picker">
-    <div class="tp-label">🎨 Change the current world's theme:</div>
+  <div class="theme-picker" id="theme-picker">
+    <div class="tp-label">🎨 Customize your world:</div>
     <div class="tp-options" id="tp-options"></div>
   </div>
 
@@ -2872,6 +2992,19 @@ document.getElementById('start-btn').addEventListener('click', doStart);
       <button class="promo-btn go" onclick="closeStudioPromo()">Got it — let's build! 🚀</button>
       <button class="promo-btn later" onclick="closeStudioPromo()">Later</button>
     </div>
+  </div>
+</div>
+
+<!-- Custom theme editor -->
+<div id="customizer">
+  <div class="cust-box">
+    <h3>🎨 Customize Your World</h3>
+    <p class="cust-sub">Change any color live — your world updates instantly and saves automatically.</p>
+    <div class="cust-section-title">Scenery &amp; Sky</div>
+    <div id="cust-fields"></div>
+    <div class="cust-section-title">Portal Colors</div>
+    <div id="cust-portals"></div>
+    <button class="cust-done" onclick="closeCustomizer()">✓ Done</button>
   </div>
 </div>
 </body>
