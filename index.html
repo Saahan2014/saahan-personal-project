@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Saahan's World</title>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7783295781496491"
+     crossorigin="anonymous"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Segoe UI',system-ui,sans-serif;}
@@ -371,6 +373,17 @@ body.mobile-mode #mobile-controls{display:block;}
 .studio-callout .sc-text h4{font-size:18px;font-weight:900;color:#FFD700;margin-bottom:7px;}
 .studio-callout .sc-text p{font-size:14px;color:rgba(255,255,255,.8);line-height:1.6;}
 
+
+/* ── THEME PICKER ── */
+.theme-picker{margin-top:26px;max-width:640px;width:100%;text-align:center;}
+.tp-label{font-size:13px;color:rgba(255,255,255,.55);margin-bottom:12px;font-weight:600;}
+.tp-options{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+.tp-opt{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 14px;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.12);border-radius:12px;cursor:pointer;transition:.13s;min-width:70px;}
+.tp-opt:hover{border-color:rgba(255,215,0,.5);background:rgba(255,255,255,.1);}
+.tp-opt.active{border-color:#FFD700;background:rgba(255,215,0,.12);}
+.tp-opt .tp-emoji{font-size:24px;}
+.tp-opt .tp-name{font-size:11px;color:rgba(255,255,255,.7);font-weight:700;}
+
 </style>
 </head>
 <body>
@@ -404,6 +417,7 @@ body.mobile-mode #mobile-controls{display:block;}
   </div>
 </div>
 <button id="worlds-btn" onclick="openWorldSelect()" style="position:fixed;top:60px;left:12px;z-index:160;background:rgba(10,10,18,.9);border:1.5px solid rgba(255,255,255,.25);border-radius:10px;color:#fff;font-size:12px;font-weight:700;padding:7px 14px;cursor:pointer;">🌐 Worlds <span style="opacity:.5;font-size:10px;">(M)</span></button>
+<button id="studio-btn" onclick="openStudio()" style="position:fixed;top:98px;left:12px;z-index:160;background:linear-gradient(90deg,#7C3AED,#EC4899);border:none;border-radius:10px;color:#fff;font-size:12px;font-weight:800;padding:7px 14px;cursor:pointer;box-shadow:0 2px 12px rgba(124,58,237,.4);">✏️ Slide Studio</button>
 <div id="portal-hint">Walk close &amp; press F or click to enter portal</div>
 
 <!-- Slideshow presentation panel -->
@@ -594,6 +608,30 @@ function arrangeInRing(portals, radius){
 // Arrange the default (Saahan's) portals in a ring at load
 arrangeInRing(PORTALS_DATA);
 
+// ── WORLD THEMES ─────────────────────────────────────────────────
+const THEMES = {
+  meadow: { name:'Meadow', icon:'🌳', sky:0x87ceeb, fog:0x87ceeb, ground:0x4a9e3f,
+            path:0xc4a267, plaza:0xccaa77, bush:0x3a7a30, tree:0x2d6a4f, trunk:0x6B3A2A,
+            ambient:0.5, sun:0xfff5cc, sunI:1.2, deco:'trees', starfield:false },
+  space:  { name:'Space', icon:'🚀', sky:0x05010f, fog:0x0a0520, ground:0x1a1a2e,
+            path:0x3a2a5a, plaza:0x2a1a4a, bush:0x4a2a6a, tree:0x6a3a8a, trunk:0x3a2a4a,
+            ambient:0.35, sun:0xaaccff, sunI:0.8, deco:'crystals', starfield:true },
+  sunset: { name:'Sunset', icon:'🌅', sky:0xff9966, fog:0xffaa88, ground:0x8a5a3a,
+            path:0xbb8855, plaza:0xaa7744, bush:0x996644, tree:0xaa5533, trunk:0x663322,
+            ambient:0.55, sun:0xffddaa, sunI:1.3, deco:'trees', starfield:false },
+  neon:   { name:'Neon City', icon:'🌃', sky:0x0a0a1a, fog:0x1a0a2a, ground:0x141428,
+            path:0x00ffcc, plaza:0xff00aa, bush:0x00ccff, tree:0xff0088, trunk:0x220044,
+            ambient:0.4, sun:0xff44ff, sunI:0.9, deco:'crystals', starfield:true },
+  snow:   { name:'Snow', icon:'❄️', sky:0xcfe8ff, fog:0xe8f4ff, ground:0xf0f6ff,
+            path:0xd0e0f0, plaza:0xe0eaf5, bush:0xcce0ee, tree:0x88aacc, trunk:0x8899aa,
+            ambient:0.7, sun:0xffffff, sunI:1.1, deco:'trees', starfield:false },
+  volcano:{ name:'Volcano', icon:'🌋', sky:0x2a0a0a, fog:0x3a0a05, ground:0x3a2020,
+            path:0x883322, plaza:0x662211, bush:0xaa3311, tree:0x992200, trunk:0x441100,
+            ambient:0.45, sun:0xff6633, sunI:1.2, deco:'crystals', starfield:false },
+};
+let activeTheme = 'meadow';
+function getTheme(){ return THEMES[activeTheme] || THEMES.meadow; }
+
 // ── MAIN SCENE ────────────────────────────────────────────────────
 let renderer, scene, camera, clock;
 let portalMeshes = [], portalRings = [];
@@ -607,10 +645,11 @@ function initMain(){
   renderer.setSize(window.innerWidth,window.innerHeight);
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  renderer.fog = new THREE.Fog(0x87ceeb, 20, 120);
+  const th=getTheme();
+  renderer.fog = new THREE.Fog(th.fog, 20, 120);
 
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x87ceeb);
+  scene.background = new THREE.Color(th.sky);
 
   camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 200);
   camera.position.set(0, 1.7, 0);
@@ -628,7 +667,8 @@ function initMain(){
 function buildWorld(){
   // Ground
   const groundGeo = new THREE.PlaneGeometry(200,200,40,40);
-  const groundMat = new THREE.MeshLambertMaterial({color:0x4a9e3f});
+  const th=getTheme();
+  const groundMat = new THREE.MeshLambertMaterial({color:th.ground});
   const ground = new THREE.Mesh(groundGeo, groundMat);
   ground.rotation.x = -Math.PI/2;
   ground.receiveShadow = true;
@@ -649,13 +689,18 @@ function buildWorld(){
     addBush(x,z);
   }
 
-  // Trees
-  const treePositions=[[-25,30],[25,30],[-25,-30],[25,-30],[-35,5],[35,5],[5,40],[-5,40],[10,-35],[-10,-35],[-20,15],[20,15],[-18,-15],[18,-15]];
-  treePositions.forEach(([x,z])=>addTree(x,z));
+  // Decorations (trees or crystals depending on theme) + optional starfield
+  const decoPositions=[[-25,30],[25,30],[-25,-30],[25,-30],[-35,5],[35,5],[5,40],[-5,40],[10,-35],[-10,-35],[-20,15],[20,15],[-18,-15],[18,-15]];
+  if(th.deco==='crystals'){
+    decoPositions.forEach(([x,z])=>addCrystal(x,z));
+  } else {
+    decoPositions.forEach(([x,z])=>addTree(x,z));
+  }
+  if(th.starfield) addStarfield();
 
   // Central plaza
   const plazaGeo = new THREE.CylinderGeometry(6,6,0.05,32);
-  const plazaMat = new THREE.MeshLambertMaterial({color:0xccaa77});
+  const plazaMat = new THREE.MeshLambertMaterial({color:th.plaza});
   const plaza = new THREE.Mesh(plazaGeo,plazaMat);
   plaza.position.set(0,0.01,0);
   scene.add(plaza);
@@ -683,7 +728,7 @@ function buildWorld(){
 
 function addPath(cx,cz,w,l,ry){
   const geo=new THREE.BoxGeometry(w,0.05,l);
-  const mat=new THREE.MeshLambertMaterial({color:0xc4a267});
+  const mat=new THREE.MeshLambertMaterial({color:getTheme().path});
   const m=new THREE.Mesh(geo,mat);
   m.position.set(cx,0.02,cz);
   m.rotation.y=ry;
@@ -693,7 +738,7 @@ function addPath(cx,cz,w,l,ry){
 function addTree(x,z){
   // trunk
   const tGeo=new THREE.CylinderGeometry(0.2,0.3,2.5,8);
-  const tMat=new THREE.MeshLambertMaterial({color:0x6B3A2A});
+  const tMat=new THREE.MeshLambertMaterial({color:getTheme().trunk});
   const trunk=new THREE.Mesh(tGeo,tMat);
   trunk.position.set(x,1.25,z);
   trunk.castShadow=true;
@@ -701,7 +746,7 @@ function addTree(x,z){
   // canopy layers
   [[0,3,2.2],[0,4.2,1.6],[0,5.2,1.1]].forEach(([dy,py,r])=>{
     const cGeo=new THREE.ConeGeometry(r,1.6,8);
-    const cMat=new THREE.MeshLambertMaterial({color:0x2d6a4f});
+    const cMat=new THREE.MeshLambertMaterial({color:getTheme().tree});
     const cone=new THREE.Mesh(cGeo,cMat);
     cone.position.set(x,py,z);
     cone.castShadow=true;
@@ -712,10 +757,41 @@ function addTree(x,z){
 function addBush(x,z){
   const r=0.3+Math.random()*0.4;
   const geo=new THREE.SphereGeometry(r,6,6);
-  const mat=new THREE.MeshLambertMaterial({color:0x3a7a30});
+  const mat=new THREE.MeshLambertMaterial({color:getTheme().bush});
   const m=new THREE.Mesh(geo,mat);
   m.position.set(x,r*0.6,z);
   scene.add(m);
+}
+
+function addCrystal(x,z){
+  const th=getTheme();
+  const h=2+Math.random()*2.5;
+  const geo=new THREE.ConeGeometry(0.5+Math.random()*0.4, h, 5);
+  const mat=new THREE.MeshStandardMaterial({color:th.tree, emissive:th.tree, emissiveIntensity:0.35, metalness:0.4, roughness:0.3});
+  const m=new THREE.Mesh(geo,mat);
+  m.position.set(x,h/2,z);
+  m.castShadow=true;
+  scene.add(m);
+  // small glow crystal on top
+  const g2=new THREE.ConeGeometry(0.25,h*0.5,5);
+  const m2=new THREE.Mesh(g2,mat);
+  m2.position.set(x+0.6,h*0.35,z+0.3);
+  scene.add(m2);
+}
+
+function addStarfield(){
+  const geo=new THREE.BufferGeometry();
+  const pts=[];
+  for(let i=0;i<600;i++){
+    const r=80+Math.random()*60;
+    const th2=Math.random()*Math.PI*2;
+    const ph=Math.random()*Math.PI*0.5; // upper hemisphere
+    pts.push(Math.cos(th2)*Math.cos(ph)*r, Math.sin(ph)*r+10, Math.sin(th2)*Math.cos(ph)*r);
+  }
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pts,3));
+  const mat=new THREE.PointsMaterial({color:0xffffff, size:0.6, transparent:true, opacity:0.9});
+  const stars=new THREE.Points(geo,mat);
+  scene.add(stars);
 }
 
 function makeTextTexture(title, subtitle, accent){
@@ -840,9 +916,10 @@ function buildPortals(){
 }
 
 function setupLights(){
-  const ambient=new THREE.AmbientLight(0xffffff,0.5);
+  const th=getTheme();
+  const ambient=new THREE.AmbientLight(0xffffff,th.ambient);
   scene.add(ambient);
-  const sun=new THREE.DirectionalLight(0xfff5cc,1.2);
+  const sun=new THREE.DirectionalLight(th.sun,th.sunI);
   sun.position.set(30,50,20);
   sun.castShadow=true;
   sun.shadow.mapSize.width=2048;
@@ -2301,6 +2378,7 @@ Return ONLY a JSON object (no markdown, no backticks, no preamble) in exactly th
   "worldName": "a short world name based on the author or theme",
   "worldIcon": "a single emoji representing the world",
   "worldDesc": "one sentence describing the world",
+  "theme": "one of: meadow, space, sunset, neon, snow, volcano — pick the one that best fits the vibe of the presentation",
   "portals": [
     {
       "label": "Project name",
@@ -2321,6 +2399,7 @@ Rules:
 - Keep body text factual and based only on the presentation content.
 - ALWAYS include one extra portal at the end titled "About Me" (label: "About Me", icon: a person emoji like the waving hand or bust emoji, colorHex "#FFD700"). This portal has 2-3 slides introducing the author: who they are, what they do, what they are proud of, and their goals - based on any name, personal details, or theme found in the presentation. If there are no personal details, write a friendly generic introduction that fits the projects shown.
 - Aim for 3-6 portals total (including the About Me portal).
+- Pick a "theme" from the allowed list that matches the mood (e.g. space for tech/sci-fi, neon for gaming, meadow for general).
 - The world is a first-person 3D space where the player spawns in the CENTER and all portals are arranged evenly in a ring around them, each facing inward. Keep the number of portals reasonable (3-6) so they fit nicely in the ring and the player can see them all from the spawn point.`;
 
   try {
@@ -2362,6 +2441,7 @@ Rules:
       name: spec.worldName || 'My World',
       icon: spec.worldIcon || '🌍',
       desc: spec.worldDesc || 'Generated from a presentation',
+      theme: (spec.theme && THEMES[spec.theme]) ? spec.theme : 'meadow',
       portals: spec.portals.map((p,i)=>({
         id: 'genp_'+i,
         label: p.label || ('Project '+(i+1)),
@@ -2419,6 +2499,7 @@ async function openWorldSelect(){
   hideCrosshair();
   document.getElementById('world-select').classList.add('open');
   renderWorldList();               // show what we have immediately
+  renderThemePicker();
   await loadPublicWorlds();        // fetch everyone's worlds
   renderWorldList();               // re-render with the public ones
 }
@@ -2426,6 +2507,32 @@ async function openWorldSelect(){
 function closeWorldSelect(){
   document.getElementById('world-select').classList.remove('open');
   canMove = true;
+  showCrosshair();
+}
+
+function renderThemePicker(){
+  const box=document.getElementById('tp-options');
+  if(!box) return;
+  box.innerHTML = Object.entries(THEMES).map(([key,t])=>`
+    <div class="tp-opt ${key===activeTheme?'active':''}" onclick="applyTheme('${key}')">
+      <span class="tp-emoji">${t.icon}</span>
+      <span class="tp-name">${t.name}</span>
+    </div>`).join('');
+}
+
+function applyTheme(key){
+  if(!THEMES[key]) return;
+  activeTheme = key;
+  // remember choice per world
+  if(activePortalSet){
+    // find the generated world currently loaded and save its theme
+    const w = generatedWorlds.find(w=>w.name && w.name.toUpperCase()===window._activeWorldName);
+    if(w){ w.theme = key; saveGeneratedWorlds(); }
+  } else {
+    window._saahanTheme = key; // remember for Saahan's world this session
+  }
+  rebuildWorld();
+  renderThemePicker();
   showCrosshair();
 }
 
@@ -2486,6 +2593,7 @@ function loadWorldById(id){
   if(id==='saahan'){
     activePortalSet = null; // use default PORTALS_DATA
     window._activeWorldName = null;
+    activeTheme = window._saahanTheme || 'meadow';
   } else {
     const world = generatedWorlds.find(w=>w.id===id);
     if(!world) return;
@@ -2511,6 +2619,7 @@ function loadWorldById(id){
     });
     arrangeInRing(portals);
     activePortalSet = portals;
+    activeTheme = (world.theme && THEMES[world.theme]) ? world.theme : 'meadow';
     window._activeWorldName = world.name.toUpperCase();
   }
 
@@ -2710,6 +2819,12 @@ document.getElementById('start-btn').addEventListener('click', doStart);
   <h2>🌐 Choose a World</h2>
   <div class="ws-sub">Explore Saahan's world, or worlds generated from presentations.</div>
   <div class="ws-grid" id="ws-grid"></div>
+
+  <div class="theme-picker">
+    <div class="tp-label">🎨 Change the current world's theme:</div>
+    <div class="tp-options" id="tp-options"></div>
+  </div>
+
   <button class="ws-back" onclick="closeWorldSelect()">← Back</button>
 </div>
 
