@@ -476,7 +476,7 @@ body.mobile-mode #mobile-controls{display:block;}
       <div class="spawn-text">
         <h3>You spawn in the center</h3>
         <p>Every portal is arranged in a ring <b>all around you</b>. Just turn and look — you can see them all from where you start.</p>
-        <p>Walk up to any glowing portal and enter it to explore a project or read about Saahan.</p>
+        <p>Walk up to any glowing portal and enter it to explore a project.</p>
         <p id="spawn-switch-desktop">Press <b style="color:#FFD700">M</b> anytime to switch worlds — every world puts you in the center with its portals around you.</p>
         <p id="spawn-switch-mobile" style="display:none;">Tap the <b style="color:#FFD700">🌐 Worlds</b> button anytime to switch worlds — every world puts you in the center with its portals around you.</p>
       </div>
@@ -1162,6 +1162,33 @@ function centerCrosshair(){
 }
 function showCrosshair(){ centerCrosshair(); document.getElementById('crosshair').style.display='block'; }
 function hideCrosshair(){ document.getElementById('crosshair').style.display='none'; }
+
+// ── SHARED MOUSE + MOVEMENT STATE FOR MENUS ──────────────────────
+// Release the mouse and freeze movement whenever a menu/panel opens.
+function releaseMouse(){
+  if(document.exitPointerLock) document.exitPointerLock();
+  canMove = false;
+  hideCrosshair();
+}
+// Re-lock the mouse and resume movement — but only if no menu is still open.
+function lockMouse(){
+  const anyPanel =
+    document.getElementById('studio').classList.contains('open') ||
+    document.getElementById('ss-panel').classList.contains('open') ||
+    document.getElementById('world-select').classList.contains('open') ||
+    document.getElementById('customizer').classList.contains('open') ||
+    document.getElementById('studio-promo').classList.contains('open') ||
+    document.getElementById('present-mode').classList.contains('open') ||
+    document.getElementById('deck-list-overlay').classList.contains('open') ||
+    document.getElementById('gen-overlay').classList.contains('open');
+  if(anyPanel) return;
+  canMove = true;
+  showCrosshair();
+  if(playMode==='desktop'){
+    const el=document.getElementById('c');
+    if(el && el.requestPointerLock){ try{ el.requestPointerLock(); }catch(e){} }
+  }
+}
 
 function getNearPortal(){
   const pos=camera.position;
@@ -2526,10 +2553,8 @@ function renderGenSteps(activeIdx){
 
 // ── WORLD SELECT SCREEN ───────────────────────────────────────────
 async function openWorldSelect(){
-  if(document.exitPointerLock) document.exitPointerLock();
-  canMove = false;
-  hideCrosshair();
   document.getElementById('world-select').classList.add('open');
+  releaseMouse();
   renderWorldList();               // show what we have immediately
   renderThemePicker();
   await loadPublicWorlds();        // fetch everyone's worlds
@@ -2538,8 +2563,7 @@ async function openWorldSelect(){
 
 function closeWorldSelect(){
   document.getElementById('world-select').classList.remove('open');
-  canMove = true;
-  showCrosshair();
+  lockMouse();
 }
 
 function renderThemePicker(){
@@ -2568,7 +2592,6 @@ function applyTheme(key){
   if(currentWorldRef){ currentWorldRef.theme = key; delete currentWorldRef.customTheme; saveGeneratedWorlds(); }
   rebuildWorld();
   renderThemePicker();
-  showCrosshair();
 }
 
 // ── CUSTOM THEME EDITOR ──────────────────────────────────────────
@@ -2608,17 +2631,19 @@ function openCustomizer(){
   activeTheme = '_custom';
   renderPortalColorList();
   document.getElementById('customizer').classList.add('open');
+  releaseMouse();
 }
 function closeCustomizer(){
   document.getElementById('customizer').classList.remove('open');
   // save it to the world
   if(currentWorldRef){ currentWorldRef.customTheme = THEMES._custom; currentWorldRef.theme='_custom'; saveGeneratedWorlds(); }
   renderThemePicker();
+  lockMouse();
 }
 function hexToInt(h){ return parseInt(h.replace('#','0x')); }
-function setCustomColor(key,val){ THEMES._custom[key]=hexToInt(val); rebuildWorld(); showCrosshair(); }
-function setCustomDeco(val){ THEMES._custom.deco=val; rebuildWorld(); showCrosshair(); }
-function setCustomStars(on){ THEMES._custom.starfield=on; rebuildWorld(); showCrosshair(); }
+function setCustomColor(key,val){ THEMES._custom[key]=hexToInt(val); rebuildWorld(); }
+function setCustomDeco(val){ THEMES._custom.deco=val; rebuildWorld(); }
+function setCustomStars(on){ THEMES._custom.starfield=on; rebuildWorld(); }
 
 // Also let the customizer change individual PORTAL colors
 function renderPortalColorList(){
@@ -2641,7 +2666,7 @@ function setPortalColor(i,val){
     currentWorldRef.portals[i].colorHex = val;
     saveGeneratedWorlds();
   }
-  rebuildWorld(); showCrosshair();
+  rebuildWorld();
 }
 
 function renderWorldList(){
@@ -2654,8 +2679,13 @@ function renderWorldList(){
       <div class="ws-portals">6 portals</div>
     </div>`;
 
-  // Your own worlds (can be deleted locally)
-  const gen = generatedWorlds.map(w=>`
+  // Your own worlds (can be deleted locally) — dedupe by name+desc
+  const seenMine=new Set();
+  const gen = generatedWorlds.filter(w=>{
+    const sig=(w.name+'|'+w.desc).toLowerCase();
+    if(seenMine.has(sig)) return false;
+    seenMine.add(sig); return true;
+  }).map(w=>`
     <div class="ws-card" onclick="loadWorldById('${w.id}')">
       <button class="ws-del" onclick="event.stopPropagation();deleteGenWorld('${w.id}')">Delete</button>
       <div class="ws-icon">${w.icon}</div>
@@ -2666,7 +2696,17 @@ function renderWorldList(){
 
   // Public worlds from the shared backend (skip ones you already made)
   const myPublicIds = new Set(generatedWorlds.map(w=>w.publicId).filter(Boolean));
-  const pub = publicWorlds.filter(w=>!myPublicIds.has(w.id)).map(w=>`
+  // Also match by name+description, since publicId isn't always saved back in time
+  const mySignatures = new Set(generatedWorlds.map(w=>(w.name+'|'+w.desc).toLowerCase()));
+  const seenPub = new Set();
+  const pub = publicWorlds.filter(w=>{
+    if(myPublicIds.has(w.id)) return false;
+    const sig=(w.name+'|'+w.desc).toLowerCase();
+    if(mySignatures.has(sig)) return false;
+    if(seenPub.has(sig)) return false;
+    seenPub.add(sig);
+    return true;
+  }).map(w=>`
     <div class="ws-card" onclick="loadPublicWorld('${w.id}')">
       <div class="ws-icon">${w.icon}</div>
       <h3>${w.name}</h3>
