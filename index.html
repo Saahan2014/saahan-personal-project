@@ -401,6 +401,15 @@ body.mobile-mode #mobile-controls{display:block;}
 .cust-row input[type=checkbox]{width:20px;height:20px;accent-color:#FFD700;cursor:pointer;}
 .cust-done{width:100%;margin-top:18px;padding:12px;background:linear-gradient(135deg,#FFE55C,#FFD700,#F5A623);color:#111;border:none;border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;}
 
+
+/* ── SIDE-RAIL AD SLOTS ── */
+.ad-rail{position:fixed;top:0;bottom:0;width:150px;background:#000;z-index:40;display:none;align-items:center;justify-content:center;border-left:1px solid rgba(255,255,255,.06);border-right:1px solid rgba(255,255,255,.06);}
+#ad-rail-left{left:0;}
+#ad-rail-right{right:0;}
+.ad-rail .ad-label{color:rgba(255,255,255,.18);font-size:12px;font-weight:800;letter-spacing:3px;writing-mode:vertical-rl;}
+/* Only show the rails on wide desktop screens where there's room */
+@media(min-width:1200px){ body.show-rails .ad-rail{display:flex;} }
+
 </style>
 </head>
 <body>
@@ -2561,7 +2570,6 @@ async function openWorldSelect(){
   document.getElementById('world-select').classList.add('open');
   releaseMouse();
   renderWorldList();               // show what we have immediately
-  renderThemePicker();
   await loadPublicWorlds();        // fetch everyone's worlds
   renderWorldList();               // re-render with the public ones
 }
@@ -2572,23 +2580,8 @@ function closeWorldSelect(){
 }
 
 function renderThemePicker(){
-  const picker=document.getElementById('theme-picker');
-  const box=document.getElementById('tp-options');
-  if(!picker||!box) return;
-  // Only worlds YOU created can be customized
-  if(!currentWorldOwned){
-    picker.style.display='none';
-    return;
-  }
-  picker.style.display='block';
-  box.innerHTML = Object.entries(THEMES).filter(([k])=>k!=='_custom').map(([key,t])=>`
-    <div class="tp-opt ${key===activeTheme?'active':''}" onclick="applyTheme('${key}')">
-      <span class="tp-emoji">${t.icon}</span>
-      <span class="tp-name">${t.name}</span>
-    </div>`).join('')
-    + `<div class="tp-opt ${activeTheme==='_custom'?'active':''}" onclick="openCustomizer()" style="border-style:dashed;">
-        <span class="tp-emoji">🎨</span><span class="tp-name">Custom</span>
-      </div>`;
+  // Themes now live inside the Customizer; keep this as a safe shim.
+  if(document.getElementById('customizer').classList.contains('open')) renderCustThemes();
 }
 
 function applyTheme(key){
@@ -2634,9 +2627,42 @@ function openCustomizer(){
   // store working copy
   THEMES._custom = cur;
   activeTheme = '_custom';
+  renderCustThemes();
   renderPortalColorList();
   document.getElementById('customizer').classList.add('open');
   releaseMouse();
+}
+
+function renderCustThemes(){
+  const box=document.getElementById('cust-themes');
+  if(!box) return;
+  box.innerHTML = Object.entries(THEMES).filter(([k])=>k!=='_custom').map(([key,t])=>`
+    <div class="tp-opt ${key===activeTheme?'active':''}" onclick="pickPresetTheme('${key}')">
+      <span class="tp-emoji">${t.icon}</span>
+      <span class="tp-name">${t.name}</span>
+    </div>`).join('');
+}
+
+// Picking a preset inside the customizer: copy its colors into the custom theme so you can then tweak
+function pickPresetTheme(key){
+  if(!THEMES[key]) return;
+  THEMES._custom = JSON.parse(JSON.stringify(THEMES[key]));
+  activeTheme = '_custom';
+  if(currentWorldRef){ currentWorldRef.customTheme = THEMES._custom; currentWorldRef.theme='_custom'; saveGeneratedWorlds(); }
+  rebuildWorld();
+  // refresh the color inputs to match the new theme
+  reopenCustFields();
+  renderCustThemes();
+}
+
+function reopenCustFields(){
+  const cur = THEMES._custom;
+  const hex = n => (typeof n==='string'?n:'#'+('000000'+(n>>>0).toString(16)).slice(-6));
+  const fields = [['sky','Sky color'],['fog','Fog / haze'],['ground','Ground'],['path','Paths'],['plaza','Center plaza'],['tree','Trees / crystals'],['bush','Bushes'],['trunk','Tree trunks']];
+  document.getElementById('cust-fields').innerHTML = fields.map(([k,label])=>`
+    <div class="cust-row"><label>${label}</label><input type="color" value="${hex(cur[k])}" oninput="setCustomColor('${k}',this.value)"></div>`).join('') + `
+    <div class="cust-row"><label>Decorations</label><select onchange="setCustomDeco(this.value)"><option value="trees" ${cur.deco==='trees'?'selected':''}>🌳 Trees</option><option value="crystals" ${cur.deco==='crystals'?'selected':''}>💎 Crystals</option></select></div>
+    <div class="cust-row"><label>Stars in sky</label><input type="checkbox" ${cur.starfield?'checked':''} onchange="setCustomStars(this.checked)"></div>`;
 }
 function closeCustomizer(){
   document.getElementById('customizer').classList.remove('open');
@@ -2855,6 +2881,7 @@ function doStart(){
   canMove=true;
   setTimeout(showCrosshair,150);
   loadGeneratedWorlds();
+  document.body.classList.add('show-rails');
   // Lock the mouse to center — desktop mode only
   if(playMode==='desktop'){
     const el=document.getElementById('c');
@@ -2985,11 +3012,6 @@ document.getElementById('start-btn').addEventListener('click', doStart);
   <div class="ws-sub">Explore Saahan's world, or worlds generated from presentations.</div>
   <div class="ws-grid" id="ws-grid"></div>
 
-  <div class="theme-picker" id="theme-picker">
-    <div class="tp-label">🎨 Customize your world:</div>
-    <div class="tp-options" id="tp-options"></div>
-  </div>
-
   <button class="ws-back" onclick="closeWorldSelect()">← Back</button>
 </div>
 
@@ -3044,7 +3066,9 @@ document.getElementById('start-btn').addEventListener('click', doStart);
 <div id="customizer">
   <div class="cust-box">
     <h3>🎨 Customize Your World</h3>
-    <p class="cust-sub">Change any color live — your world updates instantly and saves automatically.</p>
+    <p class="cust-sub">Pick a theme or change any color live — your world updates instantly and saves automatically.</p>
+    <div class="cust-section-title">Preset Themes</div>
+    <div id="cust-themes"></div>
     <div class="cust-section-title">Scenery &amp; Sky</div>
     <div id="cust-fields"></div>
     <div class="cust-section-title">Portal Colors</div>
@@ -3052,5 +3076,9 @@ document.getElementById('start-btn').addEventListener('click', doStart);
     <button class="cust-done" onclick="closeCustomizer()">✓ Done</button>
   </div>
 </div>
+
+<!-- Side-rail ad slots (reserved space for future ads) -->
+<div id="ad-rail-left" class="ad-rail"><span class="ad-label">AD</span></div>
+<div id="ad-rail-right" class="ad-rail"><span class="ad-label">AD</span></div>
 </body>
 </html>
