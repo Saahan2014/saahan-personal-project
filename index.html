@@ -598,6 +598,10 @@ function rebuildWorld(){
   // Rebuild
   portalMeshes = [];
   portalRings = [];
+  // Re-apply sky + fog from the current theme (these live on scene/renderer, not in buildWorld)
+  const th = getTheme();
+  if(scene) scene.background = new THREE.Color(th.sky);
+  if(scene) scene.fog = new THREE.Fog(th.fog, 20, 120);
   buildWorld();
   buildPortals();
   // reset camera to spawn
@@ -668,10 +672,11 @@ function initMain(){
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   const th=getTheme();
-  renderer.fog = new THREE.Fog(th.fog, 20, 120);
+  // (scene.fog is set just below, after scene is created)
 
   scene = new THREE.Scene();
   scene.background = new THREE.Color(th.sky);
+  scene.fog = new THREE.Fog(th.fog, 20, 120);
 
   camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 200);
   camera.position.set(0, 1.7, 0);
